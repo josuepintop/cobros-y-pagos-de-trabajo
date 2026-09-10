@@ -63,6 +63,10 @@ const inputMontoRetiro = document.getElementById('input-monto-retiro');
 const inputDescripcionRetiro = document.getElementById('input-descripcion-retiro');
 const inputFechaHoraRetiro = document.getElementById('input-fecha-hora-retiro');
 const historialRetirosTarjeta = document.getElementById('historial-retiros-tarjeta');
+const btnVerHistorialRetiros = document.getElementById('btn-ver-historial-retiros');
+const modalHistorialRetiros = document.getElementById('modal-historial-retiros');
+const btnCerrarHistorialRetiros = document.getElementById('btn-cerrar-historial-retiros');
+const listaHistorialRetirosCompleto = document.getElementById('lista-historial-retiros-completo');
 const btnCancelarEdicionRetiro = document.getElementById('btn-cancelar-edicion-retiro');
 const textoGuardarRetiro = document.getElementById('texto-guardar-retiro');
 const iconoGuardarRetiro = document.getElementById('icono-guardar-retiro');
@@ -76,6 +80,10 @@ const inputMontoCalendario = document.getElementById('input-monto-calendario');
 const selectDestinoCalendario = document.getElementById('select-destino-calendario');
 const tablaGananciasSemanales = document.getElementById('tabla-ganancias-semanales');
 const btnAgregarGananciaSemanal = document.getElementById('btn-agregar-ganancia-semanal');
+const btnVerHistorialCalendario = document.getElementById('btn-ver-historial-calendario');
+const modalHistorialCalendario = document.getElementById('modal-historial-calendario');
+const btnCerrarHistorialCalendario = document.getElementById('btn-cerrar-historial-calendario');
+const listaHistorialCalendarioCompleto = document.getElementById('lista-historial-calendario-completo');
 const checkboxEntrelazarDias = document.getElementById('checkbox-entrelazar-dias');
 const checkboxMultiplesTrabajos = document.getElementById('checkbox-multiples-trabajos');
 const descripcionesDias = document.getElementById('descripciones-dias');
@@ -687,12 +695,13 @@ function renderDetalleTarjeta() {
         new Date(b.fechaHora) - new Date(a.fechaHora)
     );
 
-    if (retiros.length === 0) {
-        historialRetirosTarjeta.innerHTML = '<p class="historial-vacio">Todavía no hay retiros registrados.</p>';
-        return;
-    }
+    historialRetirosTarjeta.innerHTML = retiros.length === 0
+        ? '<p class="historial-vacio">Todavía no hay retiros registrados.</p>'
+        : retiros.slice(0, 3).map(retiro => crearHtmlRetiro(retiro)).join('');
+}
 
-    historialRetirosTarjeta.innerHTML = retiros.map(retiro => `
+function crearHtmlRetiro(retiro) {
+    return `
         <div class="retiro-item">
             <div>
                 <strong>${retiro.descripcion || 'Retiro de dinero'}</strong>
@@ -710,7 +719,25 @@ function renderDetalleTarjeta() {
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+}
+
+function abrirHistorialRetiros() {
+    if (!tarjetaDetalleActiva) return;
+
+    const retiros = [...(tarjetaDetalleActiva.retiros || [])].sort((a, b) =>
+        new Date(b.fechaHora) - new Date(a.fechaHora)
+    );
+    listaHistorialRetirosCompleto.innerHTML = retiros.length === 0
+        ? '<p class="historial-vacio">Todavía no hay retiros registrados.</p>'
+        : retiros.map(retiro => crearHtmlRetiro(retiro)).join('');
+    modalHistorialRetiros.hidden = false;
+    modalHistorialRetiros.style.display = 'flex';
+}
+
+function cerrarHistorialRetiros() {
+    modalHistorialRetiros.hidden = true;
+    modalHistorialRetiros.style.display = 'none';
 }
 
 function cerrarModalDetalleTarjeta() {
@@ -1236,17 +1263,17 @@ window.guardarGananciaSemanal = async function() {
 }
 
 
-function renderGananciasSemanales() {
-    if (!tablaGananciasSemanales) return;
+function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananciasSemanales) {
+    if (!contenedor) return;
     
-    tablaGananciasSemanales.innerHTML = '';
+    contenedor.innerHTML = '';
     
     const movimientosEnCalendario = registros.filter(registro => registro.enCalendario);
     const elementosCalendario = [...gananciasSemanales, ...movimientosEnCalendario]
         .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
     if (elementosCalendario.length === 0) {
-        tablaGananciasSemanales.innerHTML = `
+        contenedor.innerHTML = `
             <div class="ganancias-empty">
                 <i class="fa-solid fa-calendar-xmark"></i>
                 <p>No hay ganancias semanales registradas</p>
@@ -1257,7 +1284,9 @@ function renderGananciasSemanales() {
 
     const nombresDias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
-    elementosCalendario.forEach(ganancia => {
+    const elementosVisibles = mostrarTodos ? elementosCalendario : elementosCalendario.slice(0, 3);
+
+    elementosVisibles.forEach(ganancia => {
         const div = document.createElement('div');
         div.className = 'ganancia-item';
 
@@ -1342,8 +1371,8 @@ function renderGananciasSemanales() {
                     <i class="fa-solid fa-check"></i> Pagar deuda
                 </button>
                 ` : ''}
-                ${!esMovimiento && estado === 'pendiente' ? `
-                <button class="btn-accion btn-pay" onclick="marcarGananciaComoPagada('${ganancia.id}')">
+                ${estado === 'pendiente' && (esMovimiento ? ganancia.tipo === 'pendiente' : true) ? `
+                <button class="btn-accion btn-pay" onclick="${esMovimiento ? `marcarComoCobrado('${ganancia.id}')` : `marcarGananciaComoPagada('${ganancia.id}')`}">
                     <i class="fa-solid fa-check"></i> Cobrar
                 </button>
                 ` : ''}
@@ -1354,7 +1383,7 @@ function renderGananciasSemanales() {
                 ` : ''}
             </div>
         `;
-        tablaGananciasSemanales.appendChild(div);
+        contenedor.appendChild(div);
     });
 }
 
@@ -1475,6 +1504,29 @@ window.eliminarGananciaSemanal = async function(id) {
 }
 
 btnAgregarGananciaSemanal.addEventListener('click', abrirModalGanancia);
+
+btnVerHistorialRetiros.addEventListener('click', abrirHistorialRetiros);
+btnCerrarHistorialRetiros.addEventListener('click', cerrarHistorialRetiros);
+modalHistorialRetiros.addEventListener('click', function(e) {
+    if (e.target === modalHistorialRetiros) cerrarHistorialRetiros();
+});
+
+function abrirHistorialCalendario() {
+    renderGananciasSemanales(true, listaHistorialCalendarioCompleto);
+    modalHistorialCalendario.hidden = false;
+    modalHistorialCalendario.style.display = 'flex';
+}
+
+function cerrarHistorialCalendario() {
+    modalHistorialCalendario.hidden = true;
+    modalHistorialCalendario.style.display = 'none';
+}
+
+btnVerHistorialCalendario.addEventListener('click', abrirHistorialCalendario);
+btnCerrarHistorialCalendario.addEventListener('click', cerrarHistorialCalendario);
+modalHistorialCalendario.addEventListener('click', function(e) {
+    if (e.target === modalHistorialCalendario) cerrarHistorialCalendario();
+});
 
 // Cerrar modal ganancia al hacer click fuera
 modalAgregarGanancia.addEventListener('click', function(e) {
@@ -1921,8 +1973,14 @@ function renderTablas() {
     tablaPrestado.innerHTML = '';
     tablaRecibido.innerHTML = '';
 
-    const pendientes = registros.filter(r => r.tipo === 'pendiente');
-    const cobrados = registros.filter(r => r.tipo === 'cobrado');
+    const pendientes = [
+        ...registros.filter(r => r.tipo === 'pendiente'),
+        ...gananciasSemanales.filter(r => r.estado === 'pendiente')
+    ];
+    const cobrados = [
+        ...registros.filter(r => r.tipo === 'cobrado'),
+        ...gananciasSemanales.filter(r => r.estado === 'pagado')
+    ];
     const prestado = registros.filter(r => r.tipo === 'prestado');
     const recibido = registros.filter(r => r.tipo === 'recibido');
 
@@ -1953,7 +2011,8 @@ function crearFila(item) {
         minute: '2-digit'
     });
 
-    const esPendiente = item.tipo === 'pendiente';
+    const esGananciaSemanal = item.tipo === 'ganancia_semanal';
+    const esPendiente = item.tipo === 'pendiente' || (esGananciaSemanal && item.estado === 'pendiente');
     const esPrestamoPendiente = item.tipo === 'prestado' && item.estado !== 'pagado';
     const colorMonto = esPendiente ? '#ef4444' : item.tipo === 'prestado' ? '#f59e0b' : '#10b981';
     const textoDestino = item.tipo === 'recibido' || item.tipo === 'prestado'
@@ -1970,11 +2029,11 @@ function crearFila(item) {
     <td>${fechaFormateada}</td>
     <td>
       <div class="action-buttons">
-                ${esPendiente ? `<button class="btn btn-pay" onclick="marcarComoCobrado('${item.id}')" title="Marcar como pagado"><i class="fa-solid fa-check"></i> Cobrar</button>` : ''}
+                ${esPendiente ? `<button class="btn btn-pay" onclick="${esGananciaSemanal ? `marcarGananciaComoPagada('${item.id}')` : `marcarComoCobrado('${item.id}')`}" title="Marcar como pagado"><i class="fa-solid fa-check"></i> Cobrar</button>` : ''}
                 ${esPrestamoPendiente ? `<button class="btn btn-pay" onclick="marcarPrestamoComoPagado('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-check"></i> Pagar deuda</button>` : ''}
-        <button class="btn btn-edit" onclick="cargarParaEditar('${item.id}')" title="Editar registro"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', true)" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>
-        <button class="btn btn-delete" onclick="eliminarRegistro('${item.id}')" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button>
+            <button class="btn btn-edit" onclick="${esGananciaSemanal ? `editarGananciaSemanal('${item.id}')` : `cargarParaEditar('${item.id}')`}" title="Editar registro"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', ${!esGananciaSemanal})" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>
+            <button class="btn btn-delete" onclick="${esGananciaSemanal ? `eliminarGananciaSemanal('${item.id}')` : `eliminarRegistro('${item.id}')`}" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button>
       </div>
     </td>
   `;

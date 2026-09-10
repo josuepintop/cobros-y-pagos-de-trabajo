@@ -590,6 +590,45 @@ body {
     font-size: 1rem;
 }
 
+.historial-titulo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.historial-titulo-row .historial-titulo {
+    margin-bottom: 12px;
+}
+
+.btn-history {
+    border: 1px solid #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.btn-history:hover {
+    background: #dbeafe;
+}
+
+.btn-history-small {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.historial-modal-card {
+    width: min(100%, 680px);
+}
+
+.historial-modal-card .modal-header {
+    margin-bottom: 8px;
+}
+
+.historial-lista-completa {
+    max-height: min(65vh, 560px);
+}
+
 .historial-retiros {
     border-top: 1px solid var(--border-color);
     margin-top: 22px;
@@ -1229,6 +1268,23 @@ th {
 
 .calendar-header h2 i {
     color: var(--blue);
+}
+
+.calendar-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.historial-calendario-card {
+    width: min(100%, 900px);
+}
+
+.historial-calendario-lista {
+    max-height: min(72vh, 680px);
+    overflow-y: auto;
 }
 
 

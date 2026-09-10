@@ -195,9 +195,14 @@
         <section class="calendar-section">
             <div class="calendar-header">
                 <h2><i class="fa-solid fa-calendar-week"></i> Calendario de Ganancias Semanales</h2>
-                <button type="button" id="btn-agregar-ganancia-semanal" class="btn btn-primary">
-                    <i class="fa-solid fa-plus"></i> Agregar Ganancia
-                </button>
+                <div class="calendar-header-actions">
+                    <button type="button" id="btn-ver-historial-calendario" class="btn btn-history">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de días trabajados
+                    </button>
+                    <button type="button" id="btn-agregar-ganancia-semanal" class="btn btn-primary">
+                        <i class="fa-solid fa-plus"></i> Agregar Ganancia
+                    </button>
+                </div>
             </div>
             <div id="tabla-ganancias-semanales" class="ganancias-container">
                 <!-- Los registros semanales se cargarán aquí dinámicamente -->
@@ -343,7 +348,12 @@
                         <input type="datetime-local" id="input-fecha-hora-retiro">
                     </div>
                     <div class="historial-retiros">
-                        <h3 class="historial-titulo"><i class="fa-solid fa-clock-rotate-left"></i> Historial de retiros</h3>
+                        <div class="historial-titulo-row">
+                            <h3 class="historial-titulo"><i class="fa-solid fa-clock-rotate-left"></i> Historial de retiros</h3>
+                            <button type="button" id="btn-ver-historial-retiros" class="btn btn-history btn-history-small">
+                                <i class="fa-solid fa-expand"></i> Ver más
+                            </button>
+                        </div>
                         <div id="historial-retiros-tarjeta" class="historial-lista"></div>
                     </div>
                 </div>
@@ -354,6 +364,18 @@
                         <i id="icono-guardar-retiro" class="fa-solid fa-arrow-up-from-bracket"></i> <span id="texto-guardar-retiro">Retirar dinero</span>
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div id="modal-historial-retiros" class="modal-overlay" hidden>
+            <div class="modal-content historial-modal-card" role="dialog" aria-modal="true" aria-labelledby="titulo-historial-retiros">
+                <div class="modal-header">
+                    <h2 id="titulo-historial-retiros"><i class="fa-solid fa-clock-rotate-left"></i> Historial de retiros</h2>
+                    <button type="button" id="btn-cerrar-historial-retiros" class="btn-cerrar-modal" aria-label="Cerrar historial de retiros">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div id="lista-historial-retiros-completo" class="historial-lista historial-lista-completa"></div>
             </div>
         </div>
 
@@ -410,6 +432,18 @@
                         <i class="fa-solid fa-check"></i> Guardar corrección
                     </button>
                 </div>
+            </div>
+        </div>
+
+        <div id="modal-historial-calendario" class="modal-overlay" hidden>
+            <div class="modal-content historial-modal-card historial-calendario-card" role="dialog" aria-modal="true" aria-labelledby="titulo-historial-calendario">
+                <div class="modal-header">
+                    <h2 id="titulo-historial-calendario"><i class="fa-solid fa-calendar-days"></i> Historial de días trabajados</h2>
+                    <button type="button" id="btn-cerrar-historial-calendario" class="btn-cerrar-modal" aria-label="Cerrar historial de días trabajados">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div id="lista-historial-calendario-completo" class="ganancias-container historial-calendario-lista"></div>
             </div>
         </div>
 
