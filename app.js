@@ -109,6 +109,8 @@ const CODIGO_RECUPERACION = '095369084906042008';
 const CLAVE_SESION = 'sesion_cobros_activa';
 const CLAVE_INTENTOS = 'intentos_acceso_cobros';
 const CLAVE_BLOQUEO = 'bloqueo_acceso_cobros';
+const CLAVE_INTENTOS_RECUPERACION = 'intentos_recuperacion_cobros';
+const CLAVE_BLOQUEO_RECUPERACION = 'bloqueo_recuperacion_cobros';
 const CLAVE_TOTAL_GENERAL_OCULTO = 'total_general_cobros_oculto';
 const CLAVE_TOTAL_TARJETAS_OCULTO = 'total_tarjetas_cobros_oculto';
 const CLAVE_TOTALES_OCULTOS_ANTIGUA = 'totales_cobros_ocultos';
@@ -120,6 +122,7 @@ let idPreferenciasVisibilidad = null;
 let contrasenaActual = localStorage.getItem('contrasena_cobros') || CONTRASENA_POR_DEFECTO;
 let codigoRecuperacionVerificado = false;
 let cargaInicialSupabase = null;
+let temporizadorBloqueoRecuperacion = null;
 
 function mostrarAplicacion() {
     pantallaBloqueo.hidden = true;
@@ -184,6 +187,53 @@ function registrarIntentoFallido() {
     mensajeAcceso.textContent = `Contraseña incorrecta. Te quedan ${intentosRestantes} intentos antes del bloqueo.`;
 }
 
+function obtenerIntentosRecuperacion() {
+    return Number(sessionStorage.getItem(CLAVE_INTENTOS_RECUPERACION)) || 0;
+}
+
+function obtenerBloqueoRecuperacionHasta() {
+    return Number(sessionStorage.getItem(CLAVE_BLOQUEO_RECUPERACION)) || 0;
+}
+
+function actualizarEstadoBloqueoRecuperacion() {
+    const bloqueoHasta = obtenerBloqueoRecuperacionHasta();
+    const tiempoRestante = bloqueoHasta - Date.now();
+
+    if (tiempoRestante <= 0) {
+        clearInterval(temporizadorBloqueoRecuperacion);
+        sessionStorage.removeItem(CLAVE_BLOQUEO_RECUPERACION);
+        codigoRecuperacionInput.disabled = false;
+        btnConfirmarRecuperacion.disabled = false;
+        return;
+    }
+
+    const segundos = Math.ceil(tiempoRestante / 1000);
+    const minutos = Math.floor(segundos / 60);
+    const segundosRestantes = String(segundos % 60).padStart(2, '0');
+    codigoRecuperacionInput.disabled = true;
+    btnConfirmarRecuperacion.disabled = true;
+    mensajeRecuperacion.textContent = `Demasiados intentos. Espera ${minutos}:${segundosRestantes} minutos para volver a intentarlo.`;
+}
+
+function iniciarBloqueoRecuperacion(minutos) {
+    sessionStorage.setItem(CLAVE_BLOQUEO_RECUPERACION, String(Date.now() + minutos * 60 * 1000));
+    actualizarEstadoBloqueoRecuperacion();
+    clearInterval(temporizadorBloqueoRecuperacion);
+    temporizadorBloqueoRecuperacion = setInterval(actualizarEstadoBloqueoRecuperacion, 1000);
+}
+
+function registrarIntentoFallidoRecuperacion() {
+    const intentos = obtenerIntentosRecuperacion() + 1;
+    sessionStorage.setItem(CLAVE_INTENTOS_RECUPERACION, String(intentos));
+
+    if (intentos >= 3) {
+        iniciarBloqueoRecuperacion((intentos - 2) * 2);
+        return;
+    }
+
+    mensajeRecuperacion.textContent = `Código incorrecto. Te quedan ${3 - intentos} intentos antes del bloqueo.`;
+}
+
 actualizarEstadoBloqueo();
 
 if (sessionStorage.getItem(CLAVE_SESION) === 'activa') {
@@ -229,6 +279,7 @@ function cerrarRecuperacion() {
 
 btnOlvidoContrasena.addEventListener('click', function() {
     modalRecuperarContrasena.hidden = false;
+    actualizarEstadoBloqueoRecuperacion();
     codigoRecuperacionInput.focus();
 });
 btnCerrarRecuperacion.addEventListener('click', cerrarRecuperacion);
@@ -243,12 +294,22 @@ formRecuperarContrasena.addEventListener('submit', async function(event) {
     if (cargaInicialSupabase) await cargaInicialSupabase;
 
     if (!codigoRecuperacionVerificado) {
-        if (codigoRecuperacionInput.value !== CODIGO_RECUPERACION) {
-            mensajeRecuperacion.textContent = 'El código especial no es correcto.';
-            codigoRecuperacionInput.focus();
+        if (obtenerBloqueoRecuperacionHasta() > Date.now()) {
+            actualizarEstadoBloqueoRecuperacion();
             return;
         }
 
+        if (codigoRecuperacionInput.value !== CODIGO_RECUPERACION) {
+            registrarIntentoFallidoRecuperacion();
+            if (!obtenerBloqueoRecuperacionHasta()) codigoRecuperacionInput.focus();
+            return;
+        }
+
+        sessionStorage.removeItem(CLAVE_INTENTOS_RECUPERACION);
+        sessionStorage.removeItem(CLAVE_BLOQUEO_RECUPERACION);
+        clearInterval(temporizadorBloqueoRecuperacion);
+        codigoRecuperacionInput.disabled = false;
+        btnConfirmarRecuperacion.disabled = false;
         codigoRecuperacionVerificado = true;
         camposNuevaContrasena.hidden = false;
         nuevaContrasenaInput.required = true;
