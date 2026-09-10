@@ -29,6 +29,17 @@ const formAcceso = document.getElementById('form-acceso');
 const contrasenaInput = document.getElementById('contrasena');
 const mensajeAcceso = document.getElementById('mensaje-acceso');
 const btnIngresar = document.getElementById('btn-ingresar');
+const btnOlvidoContrasena = document.getElementById('btn-olvido-contrasena');
+const modalRecuperarContrasena = document.getElementById('modal-recuperar-contrasena');
+const formRecuperarContrasena = document.getElementById('form-recuperar-contrasena');
+const btnCerrarRecuperacion = document.getElementById('btn-cerrar-recuperacion');
+const btnCancelarRecuperacion = document.getElementById('btn-cancelar-recuperacion');
+const codigoRecuperacionInput = document.getElementById('codigo-recuperacion');
+const camposNuevaContrasena = document.getElementById('campos-nueva-contrasena');
+const nuevaContrasenaInput = document.getElementById('nueva-contrasena');
+const confirmarContrasenaInput = document.getElementById('confirmar-contrasena');
+const mensajeRecuperacion = document.getElementById('mensaje-recuperacion');
+const btnConfirmarRecuperacion = document.getElementById('btn-confirmar-recuperacion');
 const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
 const tarjetasContainer = document.getElementById('tarjetas-container');
 const btnAgregarTarjeta = document.getElementById('btn-agregar-tarjeta');
@@ -93,16 +104,22 @@ let guardandoTarjeta = false;
 let tipoEdicionPendienteDeCancelar = null;
 let elementoCalendarioEnEdicion = null;
 
-const CONTRASENA_INICIAL = '0953690849P';
+const CONTRASENA_POR_DEFECTO = '0953690849P';
+const CODIGO_RECUPERACION = '095369084906042008';
 const CLAVE_SESION = 'sesion_cobros_activa';
 const CLAVE_INTENTOS = 'intentos_acceso_cobros';
 const CLAVE_BLOQUEO = 'bloqueo_acceso_cobros';
 const CLAVE_TOTAL_GENERAL_OCULTO = 'total_general_cobros_oculto';
 const CLAVE_TOTAL_TARJETAS_OCULTO = 'total_tarjetas_cobros_oculto';
 const CLAVE_TOTALES_OCULTOS_ANTIGUA = 'totales_cobros_ocultos';
+const MARCADOR_PREFERENCIAS_VISIBILIDAD = '[tipo:preferencias_visibilidad]';
 const preferenciaOcultaAntigua = localStorage.getItem(CLAVE_TOTALES_OCULTOS_ANTIGUA) === 'true';
 let totalGeneralOculto = localStorage.getItem(CLAVE_TOTAL_GENERAL_OCULTO) === 'true' || preferenciaOcultaAntigua;
 let totalTarjetasOculto = localStorage.getItem(CLAVE_TOTAL_TARJETAS_OCULTO) === 'true' || preferenciaOcultaAntigua;
+let idPreferenciasVisibilidad = null;
+let contrasenaActual = localStorage.getItem('contrasena_cobros') || CONTRASENA_POR_DEFECTO;
+let codigoRecuperacionVerificado = false;
+let cargaInicialSupabase = null;
 
 function mostrarAplicacion() {
     pantallaBloqueo.hidden = true;
@@ -175,10 +192,12 @@ if (sessionStorage.getItem(CLAVE_SESION) === 'activa') {
     bloquearAplicacion();
 }
 
-formAcceso.addEventListener('submit', function(e) {
+formAcceso.addEventListener('submit', async function(e) {
     e.preventDefault();
 
-    if (contrasenaInput.value === CONTRASENA_INICIAL) {
+    if (cargaInicialSupabase) await cargaInicialSupabase;
+
+    if (contrasenaInput.value === contrasenaActual) {
         sessionStorage.setItem(CLAVE_SESION, 'activa');
         sessionStorage.removeItem(CLAVE_INTENTOS);
         sessionStorage.removeItem(CLAVE_BLOQUEO);
@@ -195,6 +214,70 @@ formAcceso.addEventListener('submit', function(e) {
     if (!obtenerBloqueoHasta()) {
         contrasenaInput.focus();
     }
+});
+
+function cerrarRecuperacion() {
+    modalRecuperarContrasena.hidden = true;
+    formRecuperarContrasena.reset();
+    camposNuevaContrasena.hidden = true;
+    nuevaContrasenaInput.required = false;
+    confirmarContrasenaInput.required = false;
+    codigoRecuperacionVerificado = false;
+    mensajeRecuperacion.textContent = '';
+    btnConfirmarRecuperacion.innerHTML = '<i class="fa-solid fa-unlock-keyhole"></i> Verificar código';
+}
+
+btnOlvidoContrasena.addEventListener('click', function() {
+    modalRecuperarContrasena.hidden = false;
+    codigoRecuperacionInput.focus();
+});
+btnCerrarRecuperacion.addEventListener('click', cerrarRecuperacion);
+btnCancelarRecuperacion.addEventListener('click', cerrarRecuperacion);
+modalRecuperarContrasena.addEventListener('click', function(event) {
+    if (event.target === modalRecuperarContrasena) cerrarRecuperacion();
+});
+
+formRecuperarContrasena.addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+    if (cargaInicialSupabase) await cargaInicialSupabase;
+
+    if (!codigoRecuperacionVerificado) {
+        if (codigoRecuperacionInput.value !== CODIGO_RECUPERACION) {
+            mensajeRecuperacion.textContent = 'El código especial no es correcto.';
+            codigoRecuperacionInput.focus();
+            return;
+        }
+
+        codigoRecuperacionVerificado = true;
+        camposNuevaContrasena.hidden = false;
+        nuevaContrasenaInput.required = true;
+        confirmarContrasenaInput.required = true;
+        mensajeRecuperacion.textContent = 'Código verificado. Ahora crea tu nueva contraseña.';
+        btnConfirmarRecuperacion.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar nueva contraseña';
+        nuevaContrasenaInput.focus();
+        return;
+    }
+
+    const nuevaContrasena = nuevaContrasenaInput.value.trim();
+    if (nuevaContrasena.length < 4) {
+        mensajeRecuperacion.textContent = 'La contraseña debe tener al menos 4 caracteres.';
+        nuevaContrasenaInput.focus();
+        return;
+    }
+    if (nuevaContrasena !== confirmarContrasenaInput.value.trim()) {
+        mensajeRecuperacion.textContent = 'Las contraseñas no coinciden.';
+        confirmarContrasenaInput.focus();
+        return;
+    }
+
+    contrasenaActual = nuevaContrasena;
+    localStorage.setItem('contrasena_cobros', contrasenaActual);
+    await guardarPreferenciasVisibilidad();
+    cerrarRecuperacion();
+    mensajeAcceso.textContent = 'Contraseña actualizada. Ya puedes ingresar.';
+    mensajeAcceso.style.color = 'var(--green)';
+    contrasenaInput.focus();
 });
 
 btnCerrarSesion.addEventListener('click', bloquearAplicacion);
@@ -287,12 +370,14 @@ function alternarVisibilidadTotalGeneral() {
     localStorage.setItem(CLAVE_TOTAL_GENERAL_OCULTO, String(totalGeneralOculto));
     actualizarVisibilidadTotales();
     calcularTotales();
+    guardarPreferenciasVisibilidad();
 }
 
 function alternarVisibilidadTotalTarjetas() {
     totalTarjetasOculto = !totalTarjetasOculto;
     localStorage.setItem(CLAVE_TOTAL_TARJETAS_OCULTO, String(totalTarjetasOculto));
     actualizarVisibilidadTotales();
+    guardarPreferenciasVisibilidad();
 }
 
 btnToggleTotales.addEventListener('click', alternarVisibilidadTotalGeneral);
@@ -1554,6 +1639,64 @@ function esTarjetaSupabase(item) {
     return /\[tipo:tarjeta\]/.test(item.detalles || '');
 }
 
+function esPreferenciaVisibilidadSupabase(item) {
+    return (item.detalles || '').includes(MARCADOR_PREFERENCIAS_VISIBILIDAD);
+}
+
+function preferenciasVisibilidadDesdeSupabase(item) {
+    try {
+        const datos = JSON.parse(item.nombre || '{}');
+        return {
+            id: String(item.id),
+            totalGeneralOculto: Boolean(datos.totalGeneralOculto),
+            totalTarjetasOculto: Boolean(datos.totalTarjetasOculto),
+            contrasena: typeof datos.contrasena === 'string' && datos.contrasena ? datos.contrasena : null
+        };
+    } catch (error) {
+        return null;
+    }
+}
+
+async function guardarPreferenciasVisibilidad() {
+    const datos = {
+        nombre: JSON.stringify({ totalGeneralOculto, totalTarjetasOculto, contrasena: contrasenaActual }),
+        fecha: new Date().toISOString().slice(0, 10),
+        hora: new Date().toTimeString().slice(0, 5),
+        monto: 0,
+        detalles: MARCADOR_PREFERENCIAS_VISIBILIDAD
+    };
+    const consulta = idPreferenciasVisibilidad
+        ? supabaseClient.from(TABLA_SUPABASE).update(datos).eq('id', idPreferenciasVisibilidad)
+        : supabaseClient.from(TABLA_SUPABASE).insert(datos).select('id').single();
+    const { data, error } = await consulta;
+    if (error) {
+        console.error('No se pudieron guardar las preferencias de visibilidad:', error.message);
+        return;
+    }
+    if (data?.id) idPreferenciasVisibilidad = String(data.id);
+}
+
+async function cargarPreferenciasVisibilidad(data) {
+    const preferencia = data.find(esPreferenciaVisibilidadSupabase);
+    if (!preferencia) {
+        await guardarPreferenciasVisibilidad();
+        return;
+    }
+
+    const valores = preferenciasVisibilidadDesdeSupabase(preferencia);
+    if (!valores) return;
+
+    idPreferenciasVisibilidad = valores.id;
+    totalGeneralOculto = valores.totalGeneralOculto;
+    totalTarjetasOculto = valores.totalTarjetasOculto;
+    if (valores.contrasena) {
+        contrasenaActual = valores.contrasena;
+        localStorage.setItem('contrasena_cobros', contrasenaActual);
+    }
+    localStorage.setItem(CLAVE_TOTAL_GENERAL_OCULTO, String(totalGeneralOculto));
+    localStorage.setItem(CLAVE_TOTAL_TARJETAS_OCULTO, String(totalTarjetasOculto));
+}
+
 function claveTarjeta(tarjeta) {
     return JSON.stringify({
         nombre: tarjeta.nombre.trim().toLowerCase(),
@@ -1604,7 +1747,7 @@ async function cargarRegistrosDesdeSupabase() {
     const resultadoTarjetas = quitarTarjetasDuplicadas(tarjetasCargadas);
     const tarjetasNube = resultadoTarjetas.unicas;
     await eliminarDuplicadasDeSupabase(resultadoTarjetas.duplicadas);
-    const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item)).map(registroDesdeSupabase);
+    const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item) && !esPreferenciaVisibilidadSupabase(item)).map(registroDesdeSupabase);
     tarjetas = tarjetasNube;
     
     // Separar ganancias semanales de los registros normales
@@ -1630,6 +1773,8 @@ async function cargarDatosDesdeSupabase() {
       return;
     }
 
+    await cargarPreferenciasVisibilidad(data || []);
+
     if (data && data.length > 0) {
       // Parsear los datos usando la función existente para mantener consistencia
             const tarjetasCargadas = data.filter(esTarjetaSupabase).map(tarjetaDesdeSupabase);
@@ -1639,7 +1784,7 @@ async function cargarDatosDesdeSupabase() {
             tarjetas = tarjetasNube;
             localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
 
-            const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item)).map(registroDesdeSupabase);
+            const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item) && !esPreferenciaVisibilidadSupabase(item)).map(registroDesdeSupabase);
 
       // Separar ganancias semanales de los registros normales
       registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
@@ -2025,4 +2170,4 @@ window.marcarPrestamoComoPagado = function(id) {
 }
 
 // Iniciar la carga al completar la lectura del DOM
-document.addEventListener('DOMContentLoaded', cargarDatosDesdeSupabase);
+cargaInicialSupabase = cargarDatosDesdeSupabase();

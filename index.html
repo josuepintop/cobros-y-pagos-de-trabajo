@@ -28,8 +28,55 @@
                     <i class="fa-solid fa-arrow-right-to-bracket"></i> Ingresar
                 </button>
             </form>
+            <button type="button" id="btn-olvido-contrasena" class="auth-recovery-link">
+                <i class="fa-solid fa-key"></i> ¿Olvidaste tu contraseña?
+            </button>
         </div>
     </section>
+
+    <div id="modal-recuperar-contrasena" class="modal-overlay" hidden>
+        <div class="modal-card auth-recovery-card" role="dialog" aria-modal="true" aria-labelledby="titulo-recuperar-contrasena">
+            <button type="button" id="btn-cerrar-recuperacion" class="modal-close" aria-label="Cerrar recuperación">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="recovery-icon"><i class="fa-solid fa-shield-keyhole"></i></div>
+            <p class="recovery-kicker">Recuperación segura</p>
+            <h2 id="titulo-recuperar-contrasena">Cambiar contraseña</h2>
+            <p class="recovery-description">Confirma tu código especial para crear una nueva contraseña.</p>
+            <form id="form-recuperar-contrasena" class="auth-form">
+                <div class="form-group">
+                    <label for="codigo-recuperacion">Código especial</label>
+                    <div class="password-field">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <input type="password" id="codigo-recuperacion" inputmode="numeric" autocomplete="off" required>
+                    </div>
+                </div>
+                <div id="campos-nueva-contrasena" hidden>
+                    <div class="form-group">
+                        <label for="nueva-contrasena">Nueva contraseña</label>
+                        <div class="password-field">
+                            <i class="fa-solid fa-lock"></i>
+                            <input type="password" id="nueva-contrasena" minlength="4" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmar-contrasena">Confirmar contraseña</label>
+                        <div class="password-field">
+                            <i class="fa-solid fa-check-double"></i>
+                            <input type="password" id="confirmar-contrasena" minlength="4" autocomplete="new-password">
+                        </div>
+                    </div>
+                </div>
+                <p id="mensaje-recuperacion" class="auth-message" role="alert" aria-live="polite"></p>
+                <div class="recovery-actions">
+                    <button type="button" id="btn-cancelar-recuperacion" class="btn btn-cancel">Cancelar</button>
+                    <button type="submit" id="btn-confirmar-recuperacion" class="btn btn-save">
+                        <i class="fa-solid fa-unlock-keyhole"></i> Verificar código
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <div id="contenido-aplicacion" class="main-container" hidden>
         <header class="app-header">
