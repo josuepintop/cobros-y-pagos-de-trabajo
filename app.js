@@ -97,8 +97,12 @@ const CONTRASENA_INICIAL = '0953690849P';
 const CLAVE_SESION = 'sesion_cobros_activa';
 const CLAVE_INTENTOS = 'intentos_acceso_cobros';
 const CLAVE_BLOQUEO = 'bloqueo_acceso_cobros';
-const CLAVE_TOTALES_OCULTOS = 'totales_cobros_ocultos';
-let valoresTotalesOcultos = localStorage.getItem(CLAVE_TOTALES_OCULTOS) === 'true';
+const CLAVE_TOTAL_GENERAL_OCULTO = 'total_general_cobros_oculto';
+const CLAVE_TOTAL_TARJETAS_OCULTO = 'total_tarjetas_cobros_oculto';
+const CLAVE_TOTALES_OCULTOS_ANTIGUA = 'totales_cobros_ocultos';
+const preferenciaOcultaAntigua = localStorage.getItem(CLAVE_TOTALES_OCULTOS_ANTIGUA) === 'true';
+let totalGeneralOculto = localStorage.getItem(CLAVE_TOTAL_GENERAL_OCULTO) === 'true' || preferenciaOcultaAntigua;
+let totalTarjetasOculto = localStorage.getItem(CLAVE_TOTAL_TARJETAS_OCULTO) === 'true' || preferenciaOcultaAntigua;
 
 function mostrarAplicacion() {
     pantallaBloqueo.hidden = true;
@@ -259,33 +263,40 @@ function toggleMontoTarjeta(id) {
 
 function actualizarMontoTotalTarjetas() {
     const total = tarjetas.reduce((sum, t) => sum + t.monto, 0);
-    const valor = valoresTotalesOcultos ? '••••••' : `$${total.toFixed(2)}`;
+    const valor = totalTarjetasOculto ? '••••••' : `$${total.toFixed(2)}`;
     montoTotalTarjetas.textContent = valor;
     montoTotalTarjetasResumen.textContent = valor;
 }
 
 function actualizarVisibilidadTotales() {
-    const icono = valoresTotalesOcultos ? 'fa-eye-slash' : 'fa-eye';
-    const texto = valoresTotalesOcultos ? 'Mostrar valores totales' : 'Ocultar valores totales';
-    [btnToggleTotales, btnToggleTotalTarjetas].forEach(boton => {
+    const actualizarBoton = (boton, oculto, texto) => {
         if (!boton) return;
-        boton.setAttribute('aria-label', texto);
-        boton.setAttribute('title', texto);
-        boton.setAttribute('aria-pressed', String(valoresTotalesOcultos));
-        boton.innerHTML = `<i class="fa-solid ${icono}"></i>`;
-    });
+        boton.setAttribute('aria-label', oculto ? `Mostrar ${texto}` : `Ocultar ${texto}`);
+        boton.setAttribute('title', oculto ? `Mostrar ${texto}` : `Ocultar ${texto}`);
+        boton.setAttribute('aria-pressed', String(oculto));
+        boton.innerHTML = `<i class="fa-solid ${oculto ? 'fa-eye-slash' : 'fa-eye'}"></i>`;
+    };
+
+    actualizarBoton(btnToggleTotales, totalGeneralOculto, 'el monto total que tienes');
+    actualizarBoton(btnToggleTotalTarjetas, totalTarjetasOculto, 'el total en tarjetas');
     actualizarMontoTotalTarjetas();
 }
 
-function alternarVisibilidadTotales() {
-    valoresTotalesOcultos = !valoresTotalesOcultos;
-    localStorage.setItem(CLAVE_TOTALES_OCULTOS, String(valoresTotalesOcultos));
+function alternarVisibilidadTotalGeneral() {
+    totalGeneralOculto = !totalGeneralOculto;
+    localStorage.setItem(CLAVE_TOTAL_GENERAL_OCULTO, String(totalGeneralOculto));
     actualizarVisibilidadTotales();
     calcularTotales();
 }
 
-btnToggleTotales.addEventListener('click', alternarVisibilidadTotales);
-btnToggleTotalTarjetas.addEventListener('click', alternarVisibilidadTotales);
+function alternarVisibilidadTotalTarjetas() {
+    totalTarjetasOculto = !totalTarjetasOculto;
+    localStorage.setItem(CLAVE_TOTAL_TARJETAS_OCULTO, String(totalTarjetasOculto));
+    actualizarVisibilidadTotales();
+}
+
+btnToggleTotales.addEventListener('click', alternarVisibilidadTotalGeneral);
+btnToggleTotalTarjetas.addEventListener('click', alternarVisibilidadTotalTarjetas);
 
 function actualizarSelectorTarjetas() {
     const opcionesActuales = Array.from(tarjetaDestinoSelect.querySelectorAll('option')).slice(1);
@@ -489,7 +500,7 @@ async function sincronizarTarjetasConSupabase() {
 
 function guardarTarjetas() {
     localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
-    sincronizarTarjetasConSupabase();
+    return sincronizarTarjetasConSupabase();
 }
 
 async function eliminarTarjetaDeSupabase(id) {
@@ -1625,16 +1636,7 @@ async function cargarDatosDesdeSupabase() {
             const resultadoTarjetas = quitarTarjetasDuplicadas(tarjetasCargadas);
             const tarjetasNube = resultadoTarjetas.unicas;
             await eliminarDuplicadasDeSupabase(resultadoTarjetas.duplicadas);
-            const tarjetasLocales = tarjetas;
-            const tarjetasNuevas = [];
-            for (const tarjetaLocal of tarjetasLocales) {
-                if (!tarjetasNube.some(tarjeta => tarjeta.id === tarjetaLocal.id)) {
-                        await guardarTarjetaEnSupabase(tarjetaLocal);
-                        tarjetasNuevas.push(tarjetaLocal);
-                }
-            }
-            const resultadoFinal = quitarTarjetasDuplicadas([...tarjetasNube, ...tarjetasNuevas]);
-            tarjetas = resultadoFinal.unicas;
+            tarjetas = tarjetasNube;
             localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
 
             const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item)).map(registroDesdeSupabase);
@@ -1824,7 +1826,7 @@ function cerrarModalEliminar() {
     modalMensajeEliminacion.textContent = 'Esta acción no se puede deshacer.';
 }
 
-function confirmarEliminacion() {
+async function confirmarEliminacion() {
     if (gananciaPendienteDeEliminar) {
         const id = gananciaPendienteDeEliminar.id;
         gananciasSemanales = gananciasSemanales.filter(ganancia => ganancia.id !== id);
@@ -1850,8 +1852,8 @@ function confirmarEliminacion() {
         const id = tarjetaPendienteDeEliminar.id;
         tarjetas = tarjetas.filter(t => t.id !== id);
         localStorage.removeItem(`tarjeta-oculta-${id}`);
-        guardarTarjetas();
-        eliminarTarjetaDeSupabase(id);
+        await guardarTarjetas();
+        await eliminarTarjetaDeSupabase(id);
         renderTarjetas();
         cerrarModalEliminar();
         return;
@@ -1966,7 +1968,7 @@ function calcularTotales() {
     document.getElementById('total-pendiente').innerText = `$${totalPendiente.toFixed(2)}`;
     document.getElementById('total-prestado').innerText = `$${totalPrestado.toFixed(2)}`;
     document.getElementById('total-recibido').innerText = `$${totalRecibido.toFixed(2)}`;
-    montoTotalGeneralElement.innerText = valoresTotalesOcultos ? '••••••' : `$${totalMontoGeneral.toFixed(2)}`;
+    montoTotalGeneralElement.innerText = totalGeneralOculto ? '••••••' : `$${totalMontoGeneral.toFixed(2)}`;
 }
 
 window.editarGananciaSemanal = function(id) {
