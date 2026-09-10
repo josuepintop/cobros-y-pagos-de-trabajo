@@ -1432,6 +1432,39 @@ async function cargarRegistrosDesdeSupabase() {
     actualizarInterfaz();
 }
 
+// Integrar la función para cargar automáticamente los datos de Supabase al abrir la aplicación
+async function cargarDatosDesdeSupabase() {
+  if (typeof supabaseClient === 'undefined' || !supabaseClient) return;
+
+  try {
+    const { data, error } = await supabaseClient
+      .from(TABLA_SUPABASE)
+      .select('*');
+
+    if (error) {
+      console.error('Error al obtener datos de Supabase:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      // Parsear los datos usando la función existente para mantener consistencia
+      const todosLosRegistros = data.map(registroDesdeSupabase);
+
+      // Separar ganancias semanales de los registros normales
+      registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
+      gananciasSemanales = todosLosRegistros.filter(r => r.tipo === 'ganancia_semanal');
+
+      localStorage.setItem('registros_cobros', JSON.stringify(registros));
+      localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
+
+      // Actualizar la interfaz de usuario con los datos de la nube
+      if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
+    }
+  } catch (err) {
+    console.error('Excepción al sincronizar con Supabase:', err);
+  }
+}
+
 async function guardarRegistroEnSupabase(item) {
     const { fecha, hora } = separarFechaHora(item.fechaHora);
     const datos = {
@@ -1791,3 +1824,6 @@ window.marcarPrestamoComoPagado = function(id) {
     registroPendienteDeGuardar = prestamo;
     mostrarModalSeleccionarTarjeta();
 }
+
+// Iniciar la carga al completar la lectura del DOM
+document.addEventListener('DOMContentLoaded', cargarDatosDesdeSupabase);
