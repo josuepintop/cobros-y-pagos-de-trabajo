@@ -33,12 +33,17 @@ const btnCerrarSesion = document.getElementById('btn-cerrar-sesion');
 const tarjetasContainer = document.getElementById('tarjetas-container');
 const btnAgregarTarjeta = document.getElementById('btn-agregar-tarjeta');
 const montoTotalTarjetas = document.getElementById('monto-total-tarjetas');
+const montoTotalTarjetasResumen = document.getElementById('monto-total-tarjetas-resumen');
+const montoTotalGeneralElement = document.getElementById('monto-total-general');
+const btnToggleTotales = document.getElementById('btn-toggle-totales');
+const btnToggleTotalTarjetas = document.getElementById('btn-toggle-total-tarjetas');
 const tarjetaDestinoSelect = document.getElementById('tarjeta-destino');
 const grupoTarjeta = document.getElementById('grupo-tarjeta');
 const modalAgregarTarjeta = document.getElementById('modal-agregar-tarjeta');
 const tituloModalTarjeta = document.getElementById('titulo-modal-tarjeta');
 const textoGuardarTarjeta = document.getElementById('texto-guardar-tarjeta');
 const iconoGuardarTarjeta = document.getElementById('icono-guardar-tarjeta');
+const btnGuardarTarjeta = textoGuardarTarjeta.closest('button');
 const btnCancelarEdicionTarjeta = document.getElementById('btn-cancelar-edicion-tarjeta');
 const modalDetalleTarjeta = document.getElementById('modal-detalle-tarjeta');
 const detalleNombreTarjeta = document.getElementById('detalle-nombre-tarjeta');
@@ -84,6 +89,7 @@ let tarjetaDetalleActiva = null;
 let retiroEnEdicion = null;
 let gananciaEnEdicion = null;
 let tarjetaEnEdicion = null;
+let guardandoTarjeta = false;
 let tipoEdicionPendienteDeCancelar = null;
 let elementoCalendarioEnEdicion = null;
 
@@ -91,6 +97,8 @@ const CONTRASENA_INICIAL = '0953690849P';
 const CLAVE_SESION = 'sesion_cobros_activa';
 const CLAVE_INTENTOS = 'intentos_acceso_cobros';
 const CLAVE_BLOQUEO = 'bloqueo_acceso_cobros';
+const CLAVE_TOTALES_OCULTOS = 'totales_cobros_ocultos';
+let valoresTotalesOcultos = localStorage.getItem(CLAVE_TOTALES_OCULTOS) === 'true';
 
 function mostrarAplicacion() {
     pantallaBloqueo.hidden = true;
@@ -251,8 +259,33 @@ function toggleMontoTarjeta(id) {
 
 function actualizarMontoTotalTarjetas() {
     const total = tarjetas.reduce((sum, t) => sum + t.monto, 0);
-    montoTotalTarjetas.textContent = `$${total.toFixed(2)}`;
+    const valor = valoresTotalesOcultos ? '••••••' : `$${total.toFixed(2)}`;
+    montoTotalTarjetas.textContent = valor;
+    montoTotalTarjetasResumen.textContent = valor;
 }
+
+function actualizarVisibilidadTotales() {
+    const icono = valoresTotalesOcultos ? 'fa-eye-slash' : 'fa-eye';
+    const texto = valoresTotalesOcultos ? 'Mostrar valores totales' : 'Ocultar valores totales';
+    [btnToggleTotales, btnToggleTotalTarjetas].forEach(boton => {
+        if (!boton) return;
+        boton.setAttribute('aria-label', texto);
+        boton.setAttribute('title', texto);
+        boton.setAttribute('aria-pressed', String(valoresTotalesOcultos));
+        boton.innerHTML = `<i class="fa-solid ${icono}"></i>`;
+    });
+    actualizarMontoTotalTarjetas();
+}
+
+function alternarVisibilidadTotales() {
+    valoresTotalesOcultos = !valoresTotalesOcultos;
+    localStorage.setItem(CLAVE_TOTALES_OCULTOS, String(valoresTotalesOcultos));
+    actualizarVisibilidadTotales();
+    calcularTotales();
+}
+
+btnToggleTotales.addEventListener('click', alternarVisibilidadTotales);
+btnToggleTotalTarjetas.addEventListener('click', alternarVisibilidadTotales);
 
 function actualizarSelectorTarjetas() {
     const opcionesActuales = Array.from(tarjetaDestinoSelect.querySelectorAll('option')).slice(1);
@@ -267,6 +300,9 @@ function actualizarSelectorTarjetas() {
 }
 
 function abrirModalAgregarTarjeta() {
+    if (guardandoTarjeta) return;
+    guardandoTarjeta = false;
+    btnGuardarTarjeta.disabled = false;
     tarjetaEnEdicion = null;
     inputNombreTarjeta.value = '';
     inputMontoTarjeta.value = '';
@@ -278,7 +314,10 @@ function abrirModalAgregarTarjeta() {
     inputNombreTarjeta.focus();
 }
 
-function cerrarModalTarjeta() {
+function cerrarModalTarjeta(guardadoTerminado = false) {
+    if (guardandoTarjeta && !guardadoTerminado) return;
+    guardandoTarjeta = false;
+    btnGuardarTarjeta.disabled = false;
     modalAgregarTarjeta.style.display = 'none';
     tarjetaEnEdicion = null;
     inputNombreTarjeta.value = '';
@@ -320,17 +359,32 @@ function confirmarCancelarEdicion() {
     if (tipo === 'ganancia') cerrarModalGanancia();
 }
 
-function guardarNuevaTarjeta() {
+async function guardarNuevaTarjeta() {
+    if (guardandoTarjeta) return;
+
+    guardandoTarjeta = true;
+    btnGuardarTarjeta.disabled = true;
+    textoGuardarTarjeta.textContent = 'Guardando...';
+    iconoGuardarTarjeta.className = 'fa-solid fa-spinner fa-spin';
+
     const nombre = inputNombreTarjeta.value.trim();
     const monto = parseFloat(inputMontoTarjeta.value) || 0;
     
     if (!nombre) {
+        guardandoTarjeta = false;
+        btnGuardarTarjeta.disabled = false;
+        textoGuardarTarjeta.textContent = tarjetaEnEdicion ? 'Guardar cambios' : 'Crear Tarjeta';
+        iconoGuardarTarjeta.className = 'fa-solid fa-check';
         alert('Por favor ingresa un nombre para la tarjeta');
         inputNombreTarjeta.focus();
         return;
     }
     
     if (monto < 0) {
+        guardandoTarjeta = false;
+        btnGuardarTarjeta.disabled = false;
+        textoGuardarTarjeta.textContent = tarjetaEnEdicion ? 'Guardar cambios' : 'Crear Tarjeta';
+        iconoGuardarTarjeta.className = 'fa-solid fa-check';
         alert('El monto no puede ser negativo');
         inputMontoTarjeta.focus();
         return;
@@ -347,9 +401,19 @@ function guardarNuevaTarjeta() {
             retiros: []
         });
     }
-    guardarTarjetas();
-    cerrarModalTarjeta();
-    renderTarjetas();
+    try {
+        await sincronizarTarjetasConSupabase();
+        localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
+        cerrarModalTarjeta(true);
+        renderTarjetas();
+    } catch (error) {
+        console.error('No se pudo guardar la tarjeta:', error);
+        guardandoTarjeta = false;
+        btnGuardarTarjeta.disabled = false;
+        textoGuardarTarjeta.textContent = tarjetaEnEdicion ? 'Guardar cambios' : 'Crear Tarjeta';
+        iconoGuardarTarjeta.className = 'fa-solid fa-check';
+        alert('No se pudo guardar la tarjeta. Inténtalo de nuevo.');
+    }
 }
 
 function editarTarjeta(id) {
@@ -368,8 +432,9 @@ function editarTarjeta(id) {
 }
 
 function solicitarCancelarTarjeta() {
+    if (guardandoTarjeta) return;
     if (!tarjetaEnEdicion) {
-        cerrarModalTarjeta();
+        cerrarModalTarjeta(true);
         return;
     }
     abrirConfirmacionCancelarEdicion('tarjeta');
@@ -386,8 +451,53 @@ function eliminarTarjeta(id) {
     btnCancelarEliminacion.focus();
 }
 
+async function guardarTarjetaEnSupabase(tarjeta) {
+    const ahora = new Date();
+    const datos = {
+        nombre: tarjeta.nombre,
+        fecha: ahora.toISOString().slice(0, 10),
+        hora: ahora.toTimeString().slice(0, 5),
+        monto: tarjeta.monto,
+        detalles: `[tipo:tarjeta] [retiros:${encodeURIComponent(JSON.stringify(tarjeta.retiros || []))}]`
+    };
+    const consulta = tarjeta.id
+        ? supabaseClient.from(TABLA_SUPABASE).update(datos).eq('id', tarjeta.id).select('id').maybeSingle()
+        : supabaseClient.from(TABLA_SUPABASE).insert(datos).select('id').single();
+    const { data, error } = await consulta;
+    if (!error && data) {
+        tarjeta.id = String(data.id);
+        return tarjeta.id;
+    }
+
+    if (tarjeta.id) {
+        const nuevo = await supabaseClient.from(TABLA_SUPABASE).insert(datos).select('id').single();
+        if (!nuevo.error) {
+            tarjeta.id = String(nuevo.data.id);
+            return tarjeta.id;
+        }
+    }
+    console.error('No se pudo guardar la tarjeta en Supabase:', (error || {}).message);
+    return null;
+}
+
+async function sincronizarTarjetasConSupabase() {
+    for (const tarjeta of tarjetas) {
+        await guardarTarjetaEnSupabase(tarjeta);
+    }
+    localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
+}
+
 function guardarTarjetas() {
     localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
+    sincronizarTarjetasConSupabase();
+}
+
+async function eliminarTarjetaDeSupabase(id) {
+    if (!id) return;
+    const { error } = await supabaseClient.from(TABLA_SUPABASE).delete().eq('id', id);
+    if (error) {
+        console.error('No se pudo eliminar la tarjeta de Supabase:', error.message);
+    }
 }
 
 function obtenerFechaHoraLocal() {
@@ -1410,6 +1520,64 @@ function registroDesdeSupabase(item) {
     };
 }
 
+function tarjetaDesdeSupabase(item) {
+    const detalles = item.detalles || '';
+    const retirosMatch = detalles.match(/\[retiros:([^\]]+)\]/);
+    let retiros = [];
+    if (retirosMatch) {
+        try {
+            retiros = JSON.parse(decodeURIComponent(retirosMatch[1]));
+        } catch (error) {
+            retiros = [];
+        }
+    }
+    return {
+        id: String(item.id),
+        nombre: item.nombre || 'Tarjeta',
+        monto: Number(item.monto) || 0,
+        retiros: Array.isArray(retiros) ? retiros : []
+    };
+}
+
+function esTarjetaSupabase(item) {
+    return /\[tipo:tarjeta\]/.test(item.detalles || '');
+}
+
+function claveTarjeta(tarjeta) {
+    return JSON.stringify({
+        nombre: tarjeta.nombre.trim().toLowerCase(),
+        monto: Number(tarjeta.monto).toFixed(2),
+        retiros: tarjeta.retiros || []
+    });
+}
+
+function quitarTarjetasDuplicadas(lista) {
+    const claves = new Set();
+    const duplicadas = [];
+    const unicas = lista.filter(tarjeta => {
+        const clave = claveTarjeta(tarjeta);
+        if (claves.has(clave)) {
+            duplicadas.push(tarjeta);
+            return false;
+        }
+        claves.add(clave);
+        return true;
+    });
+    return { unicas, duplicadas };
+}
+
+async function eliminarDuplicadasDeSupabase(tarjetasDuplicadas) {
+    await Promise.all(tarjetasDuplicadas.map(async tarjeta => {
+        const { error } = await supabaseClient
+            .from(TABLA_SUPABASE)
+            .delete()
+            .eq('id', tarjeta.id);
+        if (error) {
+            console.error('No se pudo eliminar una tarjeta duplicada:', error.message);
+        }
+    }));
+}
+
 async function cargarRegistrosDesdeSupabase() {
     const { data, error } = await supabaseClient
         .from(TABLA_SUPABASE)
@@ -1421,7 +1589,12 @@ async function cargarRegistrosDesdeSupabase() {
         return;
     }
 
-    const todosLosRegistros = data.map(registroDesdeSupabase);
+    const tarjetasCargadas = data.filter(esTarjetaSupabase).map(tarjetaDesdeSupabase);
+    const resultadoTarjetas = quitarTarjetasDuplicadas(tarjetasCargadas);
+    const tarjetasNube = resultadoTarjetas.unicas;
+    await eliminarDuplicadasDeSupabase(resultadoTarjetas.duplicadas);
+    const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item)).map(registroDesdeSupabase);
+    tarjetas = tarjetasNube;
     
     // Separar ganancias semanales de los registros normales
     registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
@@ -1448,7 +1621,23 @@ async function cargarDatosDesdeSupabase() {
 
     if (data && data.length > 0) {
       // Parsear los datos usando la función existente para mantener consistencia
-      const todosLosRegistros = data.map(registroDesdeSupabase);
+            const tarjetasCargadas = data.filter(esTarjetaSupabase).map(tarjetaDesdeSupabase);
+            const resultadoTarjetas = quitarTarjetasDuplicadas(tarjetasCargadas);
+            const tarjetasNube = resultadoTarjetas.unicas;
+            await eliminarDuplicadasDeSupabase(resultadoTarjetas.duplicadas);
+            const tarjetasLocales = tarjetas;
+            const tarjetasNuevas = [];
+            for (const tarjetaLocal of tarjetasLocales) {
+                if (!tarjetasNube.some(tarjeta => tarjeta.id === tarjetaLocal.id)) {
+                        await guardarTarjetaEnSupabase(tarjetaLocal);
+                        tarjetasNuevas.push(tarjetaLocal);
+                }
+            }
+            const resultadoFinal = quitarTarjetasDuplicadas([...tarjetasNube, ...tarjetasNuevas]);
+            tarjetas = resultadoFinal.unicas;
+            localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
+
+            const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item)).map(registroDesdeSupabase);
 
       // Separar ganancias semanales de los registros normales
       registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
@@ -1459,7 +1648,14 @@ async function cargarDatosDesdeSupabase() {
 
       // Actualizar la interfaz de usuario con los datos de la nube
       if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
+        } else if (tarjetas.length > 0) {
+            const resultadoLocales = quitarTarjetasDuplicadas(tarjetas);
+            tarjetas = resultadoLocales.unicas;
+            localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
+            await sincronizarTarjetasConSupabase();
+            actualizarInterfaz();
     }
+        actualizarVisibilidadTotales();
   } catch (err) {
     console.error('Excepción al sincronizar con Supabase:', err);
   }
@@ -1655,6 +1851,7 @@ function confirmarEliminacion() {
         tarjetas = tarjetas.filter(t => t.id !== id);
         localStorage.removeItem(`tarjeta-oculta-${id}`);
         guardarTarjetas();
+        eliminarTarjetaDeSupabase(id);
         renderTarjetas();
         cerrarModalEliminar();
         return;
@@ -1697,13 +1894,13 @@ function calcularTotales() {
     let totalPendiente = 0;
     let totalPrestado = 0;
     let totalRecibido = 0;
-    let montoTotalGeneral = 0;
+    let totalMontoGeneral = 0;
 
         registros.forEach(item => {
         const fechaItem = new Date(item.fechaHora);
 
         if (item.tipo === 'cobrado') {
-            montoTotalGeneral += item.monto;
+            totalMontoGeneral += item.monto;
             if (
                 fechaItem.getDate() === ahora.getDate() &&
                 fechaItem.getMonth() === ahora.getMonth() &&
@@ -1737,7 +1934,7 @@ function calcularTotales() {
         const fechaItem = new Date(item.fechaHora);
         
         if (item.estado === 'pagado') {
-            montoTotalGeneral += item.monto;
+            totalMontoGeneral += item.monto;
             
             if (
                 fechaItem.getDate() === ahora.getDate() &&
@@ -1769,7 +1966,7 @@ function calcularTotales() {
     document.getElementById('total-pendiente').innerText = `$${totalPendiente.toFixed(2)}`;
     document.getElementById('total-prestado').innerText = `$${totalPrestado.toFixed(2)}`;
     document.getElementById('total-recibido').innerText = `$${totalRecibido.toFixed(2)}`;
-    document.getElementById('monto-total-general').innerText = `$${montoTotalGeneral.toFixed(2)}`;
+    montoTotalGeneralElement.innerText = valoresTotalesOcultos ? '••••••' : `$${totalMontoGeneral.toFixed(2)}`;
 }
 
 window.editarGananciaSemanal = function(id) {
