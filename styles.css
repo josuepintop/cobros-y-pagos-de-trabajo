@@ -519,6 +519,57 @@ body {
     color: var(--green);
 }
 
+.saldo-insuficiente {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 16px;
+    padding: 14px 16px;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff1f2, #fff7ed);
+    color: #7f1d1d;
+    animation: aviso-saldo-entrada 0.2s ease-out;
+}
+
+.saldo-insuficiente[hidden] {
+    display: none;
+}
+
+.saldo-insuficiente-icon {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    place-items: center;
+    border-radius: 50%;
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.saldo-insuficiente strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #991b1b;
+}
+
+.saldo-insuficiente p {
+    color: #9f1239;
+    font-size: 0.84rem;
+    line-height: 1.45;
+}
+
+@keyframes aviso-saldo-entrada {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .btn-primary {
     padding: 8px 15px;
     background-color: var(--green);
@@ -615,6 +666,60 @@ body {
     padding: 7px 10px;
     font-size: 0.78rem;
     white-space: nowrap;
+}
+
+.fila-editor-registro>td {
+    padding: 0;
+    border-top: 0;
+    background: #f8fafc;
+}
+
+.editor-registro-calendario {
+    margin-top: 12px;
+}
+
+.editor-registro-inline {
+    display: grid;
+    grid-template-columns: minmax(150px, 1fr) minmax(110px, 0.7fr) minmax(180px, 1.3fr) minmax(175px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    padding: 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+}
+
+.editor-registro-campo {
+    display: grid;
+    gap: 5px;
+}
+
+.editor-registro-campo label {
+    color: #475569;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.editor-registro-campo input {
+    width: 100%;
+    padding: 8px 9px;
+    font-size: 0.84rem;
+}
+
+.editor-registro-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+.editor-registro-acciones .btn {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.editor-registro-invalido .editor-registro-inline {
+    border-color: #fca5a5;
+    background: #fff1f2;
 }
 
 .historial-modal-card {
@@ -787,6 +892,40 @@ h2 {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+.table-card-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.table-card-title-row h2 {
+    margin-bottom: 0;
+}
+
+.btn-history {
+    background-color: #475569;
+    color: white;
+}
+
+.btn-history-small {
+    padding: 7px 10px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+}
+
+.historial-registros-card {
+    width: min(100%, 1000px);
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    text-align: left;
+}
+
+.historial-registros-card .modal-header {
+    margin-bottom: 18px;
 }
 
 .form-grid {
@@ -1213,6 +1352,19 @@ th {
         justify-content: center;
     }
     .modal-actions {
+        flex-direction: column-reverse;
+    }
+    .table-card-title-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .table-card-title-row .btn-history-small {
+        width: 100%;
+    }
+    .editor-registro-inline {
+        grid-template-columns: 1fr;
+    }
+    .editor-registro-acciones {
         flex-direction: column-reverse;
     }
 }

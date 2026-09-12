@@ -202,6 +202,9 @@
                     <button type="button" id="btn-agregar-ganancia-semanal" class="btn btn-primary">
                         <i class="fa-solid fa-plus"></i> Agregar Ganancia
                     </button>
+                    <button type="button" id="btn-agregar-deuda-calendario" class="btn btn-pay">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Registrar Deuda
+                    </button>
                 </div>
             </div>
             <div id="tabla-ganancias-semanales" class="ganancias-container">
@@ -395,6 +398,13 @@
                     <div id="opciones-tarjetas" class="opciones-tarjetas">
                         <!-- Se cargarán dinámicamente -->
                     </div>
+                    <div id="mensaje-saldo-insuficiente" class="saldo-insuficiente" hidden role="alert" aria-live="polite">
+                        <div class="saldo-insuficiente-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                        <div>
+                            <strong>No hay dinero suficiente</strong>
+                            <p id="detalle-saldo-insuficiente">Elige otra tarjeta con saldo disponible o cancela este pago.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" onclick="cerrarModalSeleccionarTarjeta()">Cancelar</button>
@@ -461,6 +471,7 @@
               <option value="pendiente">🔴 Cobro Pendiente (Por cobrar)</option>
               <option value="prestado">🟠 Dinero que Presté</option>
               <option value="recibido">🔵 Dinero que me Prestaron</option>
+              <option value="deuda">🟣 Deuda</option>
             </select>
                     </div>
 
@@ -505,7 +516,12 @@
 
         <!-- Tabla de Pendientes -->
         <section class="table-card table-pending">
-            <h2><i class="fa-solid fa-triangle-exclamation"></i> Pendientes de Pago (Deudas)</h2>
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-triangle-exclamation"></i> Pendientes de Pago (Deudas)</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="pendientes">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -526,7 +542,12 @@
 
         <!-- Tabla de Cobrados -->
         <section class="table-card table-success">
-            <h2><i class="fa-solid fa-circle-check"></i> Historial de Cobros Realizados</h2>
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-circle-check"></i> Historial de Cobros Realizados</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="cobrados">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -545,9 +566,61 @@
             </div>
         </section>
 
+        <!-- Historial independiente de deudas -->
+        <section class="table-card table-debt-pending">
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-file-invoice-dollar"></i> Deudas pendientes</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="deudas-pendientes">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Persona / concepto</th>
+                            <th>Monto ($)</th>
+                            <th>Descripción</th>
+                            <th>Fecha y Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-deudas-pendientes"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="table-card table-debt-paid">
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-circle-check"></i> Historial de deudas pagadas</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="deudas-pagadas">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Persona / concepto</th>
+                            <th>Monto ($)</th>
+                            <th>Descripción</th>
+                            <th>Fecha y Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-deudas-pagadas"></tbody>
+                </table>
+            </div>
+        </section>
+
         <!-- Tabla de dinero prestado -->
         <section class="table-card table-loan-out">
-            <h2><i class="fa-solid fa-hand-holding-dollar"></i> Dinero que Presté</h2>
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-hand-holding-dollar"></i> Dinero que Presté</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="prestado">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -566,7 +639,12 @@
 
         <!-- Tabla de dinero recibido en préstamo -->
         <section class="table-card table-loan-in">
-            <h2><i class="fa-solid fa-hand-holding-hand"></i> Dinero que me Prestaron</h2>
+            <div class="table-card-title-row">
+                <h2><i class="fa-solid fa-hand-holding-hand"></i> Dinero que me Prestaron</h2>
+                <button type="button" class="btn btn-history btn-history-small" data-historial-seccion="recibido">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Ver historial de registros
+                </button>
+            </div>
             <div class="table-responsive">
                 <table>
                     <thead>
@@ -582,6 +660,31 @@
                 </table>
             </div>
         </section>
+
+        <div id="modal-historial-registros" class="modal-overlay" hidden>
+            <div class="modal-content historial-modal-card historial-registros-card" role="dialog" aria-modal="true" aria-labelledby="titulo-historial-registros">
+                <div class="modal-header">
+                    <h2 id="titulo-historial-registros"><i class="fa-solid fa-clock-rotate-left"></i> Historial de registros</h2>
+                    <button type="button" id="btn-cerrar-historial-registros" class="btn-cerrar-modal" aria-label="Cerrar historial">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Persona / concepto</th>
+                                <th>Monto ($)</th>
+                                <th>Descripción</th>
+                                <th>Fecha y Hora</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-historial-registros"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
     </div>
 

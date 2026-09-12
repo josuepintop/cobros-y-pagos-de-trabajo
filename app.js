@@ -75,15 +75,22 @@ const inputNombreTarjeta = document.getElementById('input-nombre-tarjeta');
 const inputMontoTarjeta = document.getElementById('input-monto-tarjeta');
 const modalSeleccionarTarjeta = document.getElementById('modal-seleccionar-tarjeta-cobro');
 const opcionesTarjetas = document.getElementById('opciones-tarjetas');
+const mensajeSaldoInsuficiente = document.getElementById('mensaje-saldo-insuficiente');
+const detalleSaldoInsuficiente = document.getElementById('detalle-saldo-insuficiente');
 const modalEditarDestinoCalendario = document.getElementById('modal-editar-destino-calendario');
 const inputMontoCalendario = document.getElementById('input-monto-calendario');
 const selectDestinoCalendario = document.getElementById('select-destino-calendario');
 const tablaGananciasSemanales = document.getElementById('tabla-ganancias-semanales');
 const btnAgregarGananciaSemanal = document.getElementById('btn-agregar-ganancia-semanal');
+const btnAgregarDeudaCalendario = document.getElementById('btn-agregar-deuda-calendario');
 const btnVerHistorialCalendario = document.getElementById('btn-ver-historial-calendario');
 const modalHistorialCalendario = document.getElementById('modal-historial-calendario');
 const btnCerrarHistorialCalendario = document.getElementById('btn-cerrar-historial-calendario');
 const listaHistorialCalendarioCompleto = document.getElementById('lista-historial-calendario-completo');
+const modalHistorialRegistros = document.getElementById('modal-historial-registros');
+const btnCerrarHistorialRegistros = document.getElementById('btn-cerrar-historial-registros');
+const tablaHistorialRegistros = document.getElementById('tabla-historial-registros');
+const botonesHistorialSeccion = document.querySelectorAll('[data-historial-seccion]');
 const checkboxEntrelazarDias = document.getElementById('checkbox-entrelazar-dias');
 const checkboxMultiplesTrabajos = document.getElementById('checkbox-multiples-trabajos');
 const descripcionesDias = document.getElementById('descripciones-dias');
@@ -111,6 +118,8 @@ let tarjetaEnEdicion = null;
 let guardandoTarjeta = false;
 let tipoEdicionPendienteDeCancelar = null;
 let elementoCalendarioEnEdicion = null;
+let registroPendienteDePago = null;
+let deudaEnReasignacion = null;
 
 const CONTRASENA_POR_DEFECTO = '0953690849P';
 const CODIGO_RECUPERACION = '095369084906042008';
@@ -831,16 +840,38 @@ function eliminarRetiroTarjeta(id) {
 
 // Funciones para el modal de seleccionar tarjeta al guardar cobro
 function mostrarModalSeleccionarTarjeta() {
+    mensajeSaldoInsuficiente.hidden = true;
     opcionesTarjetas.innerHTML = '';
     const esDineroPrestado = registroPendienteDeGuardar?.tipo === 'prestado';
+    const esDeuda = registroPendienteDeGuardar?.tipo === 'deuda';
     const tituloModal = modalSeleccionarTarjeta.querySelector('.modal-header h2');
     const textoModal = modalSeleccionarTarjeta.querySelector('.modal-body p');
-    tituloModal.innerHTML = esDineroPrestado
+    tituloModal.innerHTML = esDeuda
+        ? '<i class="fa-solid fa-file-invoice-dollar"></i> ¿Cómo pagarás esta deuda?'
+        : esDineroPrestado
         ? '<i class="fa-solid fa-money-bill-transfer"></i> ¿De dónde sale este dinero?'
         : '<i class="fa-solid fa-circle-question"></i> ¿A dónde va este dinero?';
-    textoModal.textContent = esDineroPrestado
+    textoModal.textContent = esDeuda
+        ? 'Elige efectivo, una tarjeta o deja el pago sin asignar.'
+        : esDineroPrestado
         ? 'Selecciona la tarjeta de donde saldrá el dinero o elige efectivo.'
         : 'Selecciona a qué tarjeta o cuenta quieres enviar este monto';
+
+    if (esDeuda) {
+        const opcionSinAsignar = document.createElement('div');
+        opcionSinAsignar.className = 'opcion-tarjeta';
+        opcionSinAsignar.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                <i class="fa-solid fa-minus-circle" style="font-size: 1.5rem; color: #64748b;"></i>
+                <span>Sin asignar</span>
+            </div>
+            <i class="fa-solid fa-circle-check" style="opacity: 0;"></i>
+        `;
+        opcionSinAsignar.addEventListener('click', function() {
+            seleccionarOpcionTarjeta('sin_asignar', this);
+        });
+        opcionesTarjetas.appendChild(opcionSinAsignar);
+    }
     
     // Agregar opción de efectivo
     const opcionEfectivo = document.createElement('div');
@@ -893,9 +924,16 @@ function seleccionarOpcionTarjeta(tarjetaId, elemento) {
 }
 
 function cerrarModalSeleccionarTarjeta() {
+    if (registroPendienteDePago) {
+        registroPendienteDePago.registro.estado = registroPendienteDePago.estado;
+        registroPendienteDePago = null;
+        guardarYActualizar();
+    }
     modalSeleccionarTarjeta.style.display = 'none';
+    mensajeSaldoInsuficiente.hidden = true;
     registroPendienteDeGuardar = null;
     tarjetaSeleccionadaPendiente = null;
+    deudaEnReasignacion = null;
 }
 
 async function confirmarGuardarCobro() {
@@ -903,12 +941,21 @@ async function confirmarGuardarCobro() {
     
     const nuevoRegistro = registroPendienteDeGuardar;
     const esDineroPrestado = nuevoRegistro.tipo === 'prestado';
+    const esDeuda = nuevoRegistro.tipo === 'deuda';
     if (esDineroPrestado && !tarjetaSeleccionadaPendiente) {
         alert('Selecciona la tarjeta de donde saldrá el dinero o elige efectivo.');
         return;
     }
+    if (esDeuda && !tarjetaSeleccionadaPendiente) {
+        alert('Selecciona efectivo, una tarjeta o "Sin asignar".');
+        return;
+    }
+    const esPagoSinAsignar = esDeuda && tarjetaSeleccionadaPendiente === 'sin_asignar';
+    if (esPagoSinAsignar) {
+        nuevoRegistro.estado = 'pendiente';
+    }
     const tarjetaDestino = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
-    if (tarjetaDestino && esDineroPrestado) {
+    if (tarjetaDestino && (esDineroPrestado || esDeuda)) {
         nuevoRegistro.origenTarjetaId = tarjetaDestino.id;
         nuevoRegistro.origenTarjetaNombre = tarjetaDestino.nombre;
         nuevoRegistro.origenEfectivo = false;
@@ -916,20 +963,30 @@ async function confirmarGuardarCobro() {
         nuevoRegistro.tarjetaDestinoId = tarjetaDestino.id;
         nuevoRegistro.tarjetaDestinoNombre = tarjetaDestino.nombre;
         nuevoRegistro.destinoEfectivo = false;
-    } else if (tarjetaSeleccionadaPendiente === 'efectivo' && esDineroPrestado) {
+    } else if (tarjetaSeleccionadaPendiente === 'efectivo' && (esDineroPrestado || esDeuda)) {
         nuevoRegistro.origenTarjetaId = null;
         nuevoRegistro.origenTarjetaNombre = '';
         nuevoRegistro.origenEfectivo = true;
+    } else if (esDeuda && tarjetaSeleccionadaPendiente === 'sin_asignar') {
+        nuevoRegistro.origenTarjetaId = null;
+        nuevoRegistro.origenTarjetaNombre = '';
+        nuevoRegistro.origenEfectivo = false;
     } else if (tarjetaSeleccionadaPendiente === 'efectivo') {
         nuevoRegistro.tarjetaDestinoId = null;
         nuevoRegistro.tarjetaDestinoNombre = '';
         nuevoRegistro.destinoEfectivo = true;
     }
 
-    if (esDineroPrestado && tarjetaSeleccionadaPendiente !== 'efectivo') {
+    if ((esDineroPrestado || esDeuda) && tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'efectivo' && tarjetaSeleccionadaPendiente !== 'sin_asignar') {
         const tarjetaOrigen = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
-        if (!tarjetaOrigen || tarjetaOrigen.monto < nuevoRegistro.monto) {
-            alert('La tarjeta no tiene saldo suficiente para prestar este dinero.');
+        const saldoRestaurado = deudaEnReasignacion && deudaEnReasignacion.origenTarjetaId === tarjetaSeleccionadaPendiente
+            ? nuevoRegistro.monto
+            : 0;
+        const saldoDisponible = tarjetaOrigen ? tarjetaOrigen.monto + saldoRestaurado : 0;
+        if (!tarjetaOrigen || saldoDisponible < nuevoRegistro.monto) {
+            const montoFaltante = Math.max(0, nuevoRegistro.monto - saldoDisponible);
+            detalleSaldoInsuficiente.textContent = `Necesitas $${nuevoRegistro.monto.toFixed(2)}, pero esta opción tiene $${saldoDisponible.toFixed(2)} disponibles. Faltan $${montoFaltante.toFixed(2)}.`;
+            mensajeSaldoInsuficiente.hidden = false;
             return;
         }
     }
@@ -953,14 +1010,25 @@ async function confirmarGuardarCobro() {
         }
     }
     
-    // Cobros suman a la tarjeta; el dinero prestado sale de la tarjeta.
-    if (tarjetaSeleccionadaPendiente && esDineroPrestado) {
+    // Al reasignar una deuda se devuelve el pago anterior y se aplica el nuevo.
+    if (esDeuda && deudaEnReasignacion) {
+        const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === deudaEnReasignacion.origenTarjetaId);
+        const tarjetaNueva = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
+        if (tarjetaAnterior && tarjetaAnterior.id !== (tarjetaNueva && tarjetaNueva.id)) {
+            tarjetaAnterior.monto += nuevoRegistro.monto;
+        }
+        if (tarjetaNueva && tarjetaNueva.id !== (tarjetaAnterior && tarjetaAnterior.id)) {
+            tarjetaNueva.monto -= nuevoRegistro.monto;
+        }
+        guardarTarjetas();
+    // Cobros suman a la tarjeta; el dinero prestado y las deudas salen de la tarjeta.
+    } else if (tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'sin_asignar' && (esDineroPrestado || esDeuda)) {
         const tarjeta = tarjetas.find(t => t.id === tarjetaSeleccionadaPendiente);
         if (tarjeta) {
             tarjeta.monto -= nuevoRegistro.monto;
             guardarTarjetas();
         }
-    } else if (tarjetaSeleccionadaPendiente) {
+    } else if (tarjetaSeleccionadaPendiente && !esDeuda) {
         const tarjeta = tarjetas.find(t => t.id === tarjetaSeleccionadaPendiente);
         if (tarjeta) {
             tarjeta.monto += nuevoRegistro.monto;
@@ -970,6 +1038,8 @@ async function confirmarGuardarCobro() {
     
     guardarYActualizar();
     resetFormulario();
+    registroPendienteDePago = null;
+    deudaEnReasignacion = null;
     cerrarModalSeleccionarTarjeta();
 }
 
@@ -1262,6 +1332,13 @@ window.guardarGananciaSemanal = async function() {
     }
 }
 
+function prepararRegistroDeuda() {
+    resetFormulario();
+    tipoInput.value = 'deuda';
+    clienteInput.focus();
+    window.scrollTo({ top: document.querySelector('.form-card').offsetTop, behavior: 'smooth' });
+}
+
 
 function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananciasSemanales) {
     if (!contenedor) return;
@@ -1299,7 +1376,13 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
         const tarjetaDestino = ganancia.tarjetaDestinoId
             ? tarjetas.find(tarjeta => tarjeta.id === ganancia.tarjetaDestinoId)
             : null;
-        const destinoHtml = ganancia.tipo === 'prestado' && ganancia.origenEfectivo
+        const destinoHtml = ganancia.tipo === 'deuda' && ganancia.origenEfectivo
+            ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Deuda pagada en efectivo</strong></span></div>'
+            : ganancia.tipo === 'deuda' && ganancia.origenTarjetaId
+            ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Deuda pagada con: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
+            : ganancia.tipo === 'deuda' && ganancia.estado === 'pagado'
+            ? '<div class="ganancia-destino sin-destino"><i class="fa-solid fa-minus-circle"></i><span>Pago sin asignar</span></div>'
+            : ganancia.tipo === 'prestado' && ganancia.origenEfectivo
             ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Prestado en efectivo</strong></span></div>'
             : ganancia.tipo === 'prestado' && ganancia.origenTarjetaId
             ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Prestado desde: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
@@ -1314,7 +1397,7 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
             : '<div class="ganancia-destino sin-destino"><i class="fa-solid fa-clock"></i><span>Sin tarjeta de destino</span></div>';
         const estadoClase = estado === 'pagado' ? 'pagado' : 'pendiente';
         const estadoTexto = esMovimiento
-            ? (ganancia.tipo === 'prestado' ? (estado === 'pagado' ? '✅ Pagado' : '⏳ Deuda pendiente') : `📌 ${ganancia.tipo === 'cobrado' ? 'Cobro realizado' : 'Movimiento registrado'}`)
+            ? (ganancia.tipo === 'deuda' ? (estado === 'pagado' ? '✅ Deuda pagada' : '⏳ Deuda pendiente') : ganancia.tipo === 'prestado' ? (estado === 'pagado' ? '✅ Pagado' : '⏳ Deuda pendiente') : `📌 ${ganancia.tipo === 'cobrado' ? 'Cobro realizado' : 'Movimiento registrado'}`)
             : (estado === 'pagado' ? '✅ Pagado' : '⏳ Pendiente');
         const descripcionesPorDia = ganancia.descripcionesPorDia || {};
         const descripcionesHtml = Object.keys(descripcionesPorDia).length > 0
@@ -1351,21 +1434,26 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
             ${destinoHtml}
             <div class="ganancia-acciones">
                 ${!esMovimiento ? `
-                <button class="btn-accion btn-edit" onclick="editarGananciaSemanal('${ganancia.id}')">
+                <button class="btn-accion btn-edit" onclick="editarRegistroEnTabla('${ganancia.id}', this)">
                     <i class="fa-solid fa-pen"></i> Editar
                 </button>
                 ` : ''}
                 ${esMovimiento ? `
-                <button class="btn-accion btn-edit" onclick="cargarParaEditar('${ganancia.id}')">
+                <button class="btn-accion btn-edit" onclick="editarRegistroEnTabla('${ganancia.id}', this)">
                     <i class="fa-solid fa-pen"></i> Editar
                 </button>
                 <button class="btn-accion btn-delete" onclick="eliminarRegistro('${ganancia.id}')">
                     <i class="fa-solid fa-trash"></i> Eliminar
                 </button>
                 ` : ''}
-                <button class="btn-accion btn-destino" onclick="abrirEditarDestinoCalendario('${ganancia.id}', ${esMovimiento})">
+                ${ganancia.tipo !== 'deuda' ? `<button class="btn-accion btn-destino" onclick="abrirEditarDestinoCalendario('${ganancia.id}', ${esMovimiento})">
                     <i class="fa-solid fa-wallet"></i> ${ganancia.tarjetaDestinoId || ganancia.destinoEfectivo ? 'Cambiar destino' : 'Asignar tarjeta'}
+                </button>` : ''}
+                ${ganancia.tipo === 'deuda' && estado !== 'pagado' ? `
+                <button class="btn-accion btn-pay" onclick="marcarDeudaComoPagada('${ganancia.id}')">
+                    <i class="fa-solid fa-file-invoice-dollar"></i> Pagar deuda
                 </button>
+                ` : ''}
                 ${ganancia.tipo === 'prestado' && estado !== 'pagado' ? `
                 <button class="btn-accion btn-pay" onclick="marcarPrestamoComoPagado('${ganancia.id}')">
                     <i class="fa-solid fa-check"></i> Pagar deuda
@@ -1504,6 +1592,7 @@ window.eliminarGananciaSemanal = async function(id) {
 }
 
 btnAgregarGananciaSemanal.addEventListener('click', abrirModalGanancia);
+btnAgregarDeudaCalendario.addEventListener('click', prepararRegistroDeuda);
 
 btnVerHistorialRetiros.addEventListener('click', abrirHistorialRetiros);
 btnCerrarHistorialRetiros.addEventListener('click', cerrarHistorialRetiros);
@@ -1586,8 +1675,12 @@ form.addEventListener('submit', async function(e) {
         return;
     }
 
-    if (tipo === 'prestado' && !id) {
+    if ((tipo === 'prestado' || tipo === 'deuda') && !id) {
         nuevoRegistro.estado = 'pendiente';
+    }
+
+    if (id && registroOriginal && (tipo === 'prestado' || tipo === 'deuda')) {
+        nuevoRegistro.estado = registroOriginal.estado || 'pendiente';
     }
 
     // Para otros tipos de registro o edición, guardar normalmente
@@ -1639,18 +1732,18 @@ function detallesParaSupabase(item) {
     const origenTarjeta = item.origenTarjetaId ? ` [origenTarjeta:${encodeURIComponent(item.origenTarjetaId)}]` : '';
     const origenNombre = item.origenTarjetaNombre ? ` [origenNombre:${encodeURIComponent(item.origenTarjetaNombre)}]` : '';
     const origenEfectivo = item.origenEfectivo ? ' [origenEfectivo:si]' : '';
-    const estadoRegistro = item.tipo === 'prestado' ? ` [estadoRegistro:${item.estado || 'pendiente'}]` : '';
+    const estadoRegistro = item.tipo === 'prestado' || item.tipo === 'deuda' ? ` [estadoRegistro:${item.estado || 'pendiente'}]` : '';
     return `${item.descripcion}${calendario}${tarjetaDestino}${tarjetaNombre}${efectivo}${origenTarjeta}${origenNombre}${origenEfectivo}${estadoRegistro} ${PREFIJO_TIPO}${item.tipo}]`;
 }
 
 function registroDesdeSupabase(item) {
     const detalles = item.detalles || 'Sin detalle';
-    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|ganancia_semanal)\]$/);
+    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal)\]$/);
     const tipo = tipoEncontrado ? tipoEncontrado[1] : 'cobrado';
     
-    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|ganancia_semanal)\]$/, '').trim();
+    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal)\]$/, '').trim();
     let dias = [];
-    let estado = tipo === 'prestado' ? 'pendiente' : 'pagado';
+    let estado = tipo === 'prestado' || tipo === 'deuda' ? 'pendiente' : 'pagado';
     const estadoRegistroMatch = detalles.match(/\[estadoRegistro:(pagado|pendiente)\]/);
     if (estadoRegistroMatch) estado = estadoRegistroMatch[1];
     descripcion = descripcion.replace(/\s*\[estadoRegistro:(pagado|pendiente)\]/, '').trim();
@@ -1967,11 +2060,15 @@ function renderTablas() {
     const tablaCobrados = document.getElementById('tabla-cobrados');
     const tablaPrestado = document.getElementById('tabla-prestado');
     const tablaRecibido = document.getElementById('tabla-recibido');
+    const tablaDeudasPendientes = document.getElementById('tabla-deudas-pendientes');
+    const tablaDeudasPagadas = document.getElementById('tabla-deudas-pagadas');
 
     tablaPendientes.innerHTML = '';
     tablaCobrados.innerHTML = '';
     tablaPrestado.innerHTML = '';
     tablaRecibido.innerHTML = '';
+    tablaDeudasPendientes.innerHTML = '';
+    tablaDeudasPagadas.innerHTML = '';
 
     const pendientes = [
         ...registros.filter(r => r.tipo === 'pendiente'),
@@ -1983,23 +2080,90 @@ function renderTablas() {
     ];
     const prestado = registros.filter(r => r.tipo === 'prestado');
     const recibido = registros.filter(r => r.tipo === 'recibido');
+    const deudasPendientes = registros.filter(r => r.tipo === 'deuda' && r.estado !== 'pagado');
+    const deudasPagadas = registros.filter(r => r.tipo === 'deuda' && r.estado === 'pagado');
 
     renderTabla(tablaPendientes, pendientes, 'No hay cobros pendientes registrados.');
     renderTabla(tablaCobrados, cobrados, 'No hay cobros realizados registrados.');
     renderTabla(tablaPrestado, prestado, 'No hay dinero prestado registrado.');
     renderTabla(tablaRecibido, recibido, 'No hay dinero recibido en préstamo registrado.');
+    renderTabla(tablaDeudasPendientes, deudasPendientes, 'No hay deudas pendientes registradas.');
+    renderTabla(tablaDeudasPagadas, deudasPagadas, 'No hay deudas pagadas registradas.');
 }
 
-function renderTabla(tabla, items, mensajeVacio) {
+function ordenarPorFecha(items) {
+    return [...items].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+}
+
+function renderTabla(tabla, items, mensajeVacio, mostrarTodos = false) {
+    const itemsOrdenados = ordenarPorFecha(items);
+    const itemsVisibles = mostrarTodos ? itemsOrdenados : itemsOrdenados.slice(0, 3);
+
     if (items.length === 0) {
         tabla.innerHTML = `<tr><td colspan="5" class="empty-text">${mensajeVacio}</td></tr>`;
         return;
     }
 
-    items.forEach(item => {
+    itemsVisibles.forEach(item => {
         tabla.appendChild(crearFila(item));
     });
 }
+
+const datosHistorialSecciones = {
+    pendientes: {
+        titulo: 'Pendientes de Pago (Deudas)',
+        mensaje: 'No hay cobros pendientes registrados.',
+        obtener: () => [...registros.filter(r => r.tipo === 'pendiente'), ...gananciasSemanales.filter(r => r.estado === 'pendiente')]
+    },
+    cobrados: {
+        titulo: 'Historial de Cobros Realizados',
+        mensaje: 'No hay cobros realizados registrados.',
+        obtener: () => [...registros.filter(r => r.tipo === 'cobrado'), ...gananciasSemanales.filter(r => r.estado === 'pagado')]
+    },
+    'deudas-pendientes': {
+        titulo: 'Deudas pendientes',
+        mensaje: 'No hay deudas pendientes registradas.',
+        obtener: () => registros.filter(r => r.tipo === 'deuda' && r.estado !== 'pagado')
+    },
+    'deudas-pagadas': {
+        titulo: 'Historial de deudas pagadas',
+        mensaje: 'No hay deudas pagadas registradas.',
+        obtener: () => registros.filter(r => r.tipo === 'deuda' && r.estado === 'pagado')
+    },
+    prestado: {
+        titulo: 'Dinero que Presté',
+        mensaje: 'No hay dinero prestado registrado.',
+        obtener: () => registros.filter(r => r.tipo === 'prestado')
+    },
+    recibido: {
+        titulo: 'Dinero que me Prestaron',
+        mensaje: 'No hay dinero recibido en préstamo registrado.',
+        obtener: () => registros.filter(r => r.tipo === 'recibido')
+    }
+};
+
+function abrirHistorialRegistros(seccion) {
+    const datos = datosHistorialSecciones[seccion];
+    if (!datos) return;
+
+    document.getElementById('titulo-historial-registros').innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${datos.titulo}`;
+    renderTabla(tablaHistorialRegistros, datos.obtener(), datos.mensaje, true);
+    modalHistorialRegistros.hidden = false;
+    modalHistorialRegistros.style.display = 'flex';
+}
+
+function cerrarHistorialRegistros() {
+    modalHistorialRegistros.hidden = true;
+    modalHistorialRegistros.style.display = 'none';
+}
+
+botonesHistorialSeccion.forEach(boton => {
+    boton.addEventListener('click', () => abrirHistorialRegistros(boton.dataset.historialSeccion));
+});
+btnCerrarHistorialRegistros.addEventListener('click', cerrarHistorialRegistros);
+modalHistorialRegistros.addEventListener('click', event => {
+    if (event.target === modalHistorialRegistros) cerrarHistorialRegistros();
+});
 
 function crearFila(item) {
     const tr = document.createElement('tr');
@@ -2014,30 +2178,113 @@ function crearFila(item) {
     const esGananciaSemanal = item.tipo === 'ganancia_semanal';
     const esPendiente = item.tipo === 'pendiente' || (esGananciaSemanal && item.estado === 'pendiente');
     const esPrestamoPendiente = item.tipo === 'prestado' && item.estado !== 'pagado';
-    const colorMonto = esPendiente ? '#ef4444' : item.tipo === 'prestado' ? '#f59e0b' : '#10b981';
+    const esDeudaPendiente = item.tipo === 'deuda' && item.estado !== 'pagado';
+    const colorMonto = esPendiente || esDeudaPendiente ? '#ef4444' : item.tipo === 'prestado' ? '#f59e0b' : '#10b981';
     const textoDestino = item.tipo === 'recibido' || item.tipo === 'prestado'
         ? (item.origenTarjetaId || item.origenEfectivo ? 'Cambiar origen' : 'Retirar de tarjeta')
         : (item.tarjetaDestinoId || item.destinoEfectivo ? 'Cambiar destino' : 'Mandar a tarjeta');
     const estadoPrestamo = item.tipo === 'prestado'
         ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagado' : '⏳ Deuda pendiente'}</span>`
         : '';
+    const estadoDeuda = item.tipo === 'deuda'
+        ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagada' : '⏳ Pendiente'}</span>`
+        : '';
 
     tr.innerHTML = `
     <td><strong>${item.cliente}</strong></td>
     <td style="color: ${colorMonto}; font-weight: 700;">$${item.monto.toFixed(2)}</td>
-    <td>${item.descripcion}${estadoPrestamo}</td>
+    <td>${item.descripcion}${estadoPrestamo}${estadoDeuda}</td>
     <td>${fechaFormateada}</td>
     <td>
       <div class="action-buttons">
                 ${esPendiente ? `<button class="btn btn-pay" onclick="${esGananciaSemanal ? `marcarGananciaComoPagada('${item.id}')` : `marcarComoCobrado('${item.id}')`}" title="Marcar como pagado"><i class="fa-solid fa-check"></i> Cobrar</button>` : ''}
                 ${esPrestamoPendiente ? `<button class="btn btn-pay" onclick="marcarPrestamoComoPagado('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-check"></i> Pagar deuda</button>` : ''}
-            <button class="btn btn-edit" onclick="${esGananciaSemanal ? `editarGananciaSemanal('${item.id}')` : `cargarParaEditar('${item.id}')`}" title="Editar registro"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', ${!esGananciaSemanal})" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>
+                ${esDeudaPendiente ? `<button class="btn btn-pay" onclick="marcarDeudaComoPagada('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-file-invoice-dollar"></i> Pagar deuda</button>` : ''}
+                ${item.tipo === 'deuda' && item.estado === 'pagado' ? `<button class="btn btn-destino" onclick="cambiarPagoDeuda('${item.id}')" title="Cambiar método de pago"><i class="fa-solid fa-arrows-rotate"></i> Cambiar pago</button>` : ''}
+            <button class="btn btn-edit" onclick="editarRegistroEnTabla('${item.id}', this)" title="Editar registro aquí"><i class="fa-solid fa-pen"></i></button>
+        ${item.tipo !== 'deuda' ? `<button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', ${!esGananciaSemanal})" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>` : ''}
             <button class="btn btn-delete" onclick="${esGananciaSemanal ? `eliminarGananciaSemanal('${item.id}')` : `eliminarRegistro('${item.id}')`}" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button>
       </div>
     </td>
   `;
     return tr;
+}
+
+window.editarRegistroEnTabla = function(id, boton) {
+    const item = [...registros, ...gananciasSemanales].find(registro => registro.id === id);
+    if (!item) return;
+
+    const filaActual = boton.closest('tr');
+    const elementoActual = filaActual || boton.closest('.ganancia-item');
+    if (!elementoActual) return;
+
+    const editorExistente = elementoActual.nextElementSibling;
+    if (editorExistente?.classList.contains('fila-editor-registro')) {
+        editorExistente.remove();
+        return;
+    }
+
+    document.querySelectorAll('.fila-editor-registro').forEach(fila => fila.remove());
+
+    const filaEditor = document.createElement(filaActual ? 'tr' : 'div');
+    filaEditor.className = filaActual ? 'fila-editor-registro' : 'editor-registro-calendario';
+    const contenidoEditor = `
+            <div class="editor-registro-inline">
+                <div class="editor-registro-campo">
+                    <label>Persona / concepto</label>
+                    <input type="text" class="editor-cliente" value="${escaparHtml(item.cliente || '')}">
+                </div>
+                <div class="editor-registro-campo">
+                    <label>Monto ($)</label>
+                    <input type="number" class="editor-monto" min="0" step="0.01" value="${Number(item.monto || 0).toFixed(2)}">
+                </div>
+                <div class="editor-registro-campo editor-registro-descripcion">
+                    <label>Descripción</label>
+                    <input type="text" class="editor-descripcion" value="${escaparHtml(item.descripcion || '')}">
+                </div>
+                <div class="editor-registro-campo">
+                    <label>Fecha y hora</label>
+                    <input type="datetime-local" class="editor-fecha" value="${escaparHtml(item.fechaHora || '')}">
+                </div>
+                <div class="editor-registro-acciones">
+                    <button type="button" class="btn btn-cancel btn-cancelar-editor"><i class="fa-solid fa-xmark"></i> Cancelar</button>
+                    <button type="button" class="btn btn-save btn-guardar-editor"><i class="fa-solid fa-check"></i> Guardar</button>
+                </div>
+            </div>
+    `;
+    filaEditor.innerHTML = filaActual ? `<td colspan="5">${contenidoEditor}</td>` : contenidoEditor;
+
+    elementoActual.after(filaEditor);
+    filaEditor.querySelector('.editor-cliente').focus();
+    filaEditor.querySelector('.btn-cancelar-editor').addEventListener('click', () => filaEditor.remove());
+    filaEditor.querySelector('.btn-guardar-editor').addEventListener('click', async () => {
+        const cliente = filaEditor.querySelector('.editor-cliente').value.trim();
+        const monto = Number(filaEditor.querySelector('.editor-monto').value);
+        const descripcion = filaEditor.querySelector('.editor-descripcion').value.trim() || 'Sin detalle';
+        const fechaHora = filaEditor.querySelector('.editor-fecha').value;
+
+        if (!cliente || !Number.isFinite(monto) || monto < 0 || !fechaHora) {
+            filaEditor.classList.add('editor-registro-invalido');
+            return;
+        }
+
+        item.cliente = cliente;
+        item.monto = monto;
+        item.descripcion = descripcion;
+        item.fechaHora = fechaHora;
+        await guardarRegistroEnSupabase(item);
+        guardarYActualizar();
+    });
+};
+
+function escaparHtml(valor) {
+    return String(valor).replace(/[&<>'"]/g, caracter => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        "'": '&#39;',
+        '"': '&quot;'
+    })[caracter]);
 }
 
 function marcarComoCobrado(id) {
@@ -2067,7 +2314,6 @@ function cargarParaEditar(id) {
         document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-pen-to-square"></i> Editar Registro';
         btnGuardar.innerHTML = '<i class="fa-solid fa-arrows-rotate"></i> Actualizar Registro';
         btnCancelar.style.display = 'inline-flex';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 }
 
@@ -2286,6 +2532,29 @@ window.marcarPrestamoComoPagado = function(id) {
 
     prestamo.estado = 'pagado';
     registroPendienteDeGuardar = prestamo;
+    mostrarModalSeleccionarTarjeta();
+}
+
+window.marcarDeudaComoPagada = function(id) {
+    const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
+    if (!deuda || deuda.estado === 'pagado') return;
+
+    deudaEnReasignacion = null;
+    registroPendienteDePago = { registro: deuda, estado: deuda.estado };
+    deuda.estado = 'pagado';
+    registroPendienteDeGuardar = deuda;
+    mostrarModalSeleccionarTarjeta();
+}
+
+window.cambiarPagoDeuda = function(id) {
+    const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
+    if (!deuda || deuda.estado !== 'pagado') return;
+
+    deudaEnReasignacion = {
+        origenTarjetaId: deuda.origenTarjetaId || null,
+        origenEfectivo: Boolean(deuda.origenEfectivo)
+    };
+    registroPendienteDeGuardar = deuda;
     mostrarModalSeleccionarTarjeta();
 }
 
