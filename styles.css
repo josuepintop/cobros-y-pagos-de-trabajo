@@ -273,6 +273,10 @@ body {
     background-color: #334155;
 }
 
+.card-cash .card-icon {
+    background: linear-gradient(135deg, #b7791f, #d69e2e);
+}
+
 .card-info h3 {
     font-size: 0.8rem;
     text-transform: uppercase;
@@ -588,10 +592,142 @@ body {
     background-color: #059669;
 }
 
+.btn-cash {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    background: #b7791f;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.95rem;
+}
+
+.btn-cash:hover {
+    background: #975a16;
+}
+
 .tarjetas-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 15px;
+}
+
+.cash-history-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fffdf5 0%, #ffffff 100%);
+    box-shadow: 0 4px 12px rgba(120, 83, 20, 0.06);
+}
+
+.cash-history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.cash-history-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--primary-color);
+    font-size: 1.2rem;
+}
+
+.cash-history-header h2 i {
+    color: #b7791f;
+}
+
+.section-kicker {
+    margin-bottom: 4px;
+    color: #a16207;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.cash-history-list {
+    display: grid;
+    gap: 8px;
+}
+
+.cash-history-item {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 12px;
+    border: 1px solid #fef3c7;
+    border-radius: 9px;
+    background: #ffffff;
+}
+
+.cash-history-icon {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.cash-history-data {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+
+.cash-history-data strong {
+    overflow: hidden;
+    color: var(--primary-color);
+    font-size: 0.88rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.cash-history-data span {
+    color: #78716c;
+    font-size: 0.76rem;
+}
+
+.cash-history-item>b {
+    color: #b91c1c;
+    font-size: 0.92rem;
+}
+
+.cash-history-empty {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 22px 14px;
+    border: 1px dashed #f6d365;
+    border-radius: 10px;
+    background: rgba(255, 251, 235, 0.7);
+    color: #78716c;
+    text-align: center;
+}
+
+.cash-history-empty i {
+    margin-bottom: 2px;
+    color: #d69e2e;
+    font-size: 1.5rem;
+}
+
+.cash-history-empty strong {
+    color: #854d0e;
+    font-size: 0.92rem;
+}
+
+.cash-history-empty span {
+    font-size: 0.8rem;
 }
 
 .tarjeta-item {
@@ -634,6 +770,12 @@ body {
 
 .tarjeta-detalle-saldo strong {
     font-size: 1.35rem;
+}
+
+.efectivo-saldo {
+    border-color: #f6d365;
+    background: #fffbeb;
+    color: #854d0e;
 }
 
 .historial-titulo {
@@ -944,6 +1086,10 @@ h2 {
     gap: 6px;
 }
 
+.form-group[hidden] {
+    display: none !important;
+}
+
 .form-group label {
     font-size: 0.85rem;
     font-weight: 600;
@@ -1101,6 +1247,126 @@ select:focus {
 .modal-card p {
     color: #64748b;
     font-size: 0.9rem;
+}
+
+.retiro-confirmacion-card {
+    width: min(100%, 420px);
+    text-align: center;
+    border: 1px solid #fde68a;
+    background: linear-gradient(180deg, #fffdf5, #ffffff);
+}
+
+.retiro-error-aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0 0 16px;
+    padding: 12px 14px;
+    border: 1px solid #fca5a5;
+    border-left: 4px solid #dc2626;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #fff1f2, #fef2f2);
+    color: #991b1b;
+    font-size: 0.86rem;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: left;
+    box-shadow: 0 6px 16px rgba(220, 38, 38, 0.08);
+}
+
+.retiro-error-aviso[hidden],
+.saldo-insuficiente-texto[hidden] {
+    display: none;
+}
+
+.retiro-error-aviso i {
+    margin-top: 2px;
+    color: #dc2626;
+}
+
+.retiro-error-form {
+    margin: 0 0 18px;
+}
+
+.saldo-insuficiente-texto {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #b91c1c;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.saldo-insuficiente-texto i {
+    color: #dc2626;
+}
+
+.retiro-confirmacion-datos .saldo-insuficiente-texto {
+    margin-top: 0;
+    padding-top: 8px;
+    border-top: 1px solid #fecaca;
+}
+
+.modal-icon-retiro {
+    border-color: #fef3c7;
+    background: #fef3c7;
+    color: #b7791f;
+    box-shadow: 0 8px 20px rgba(180, 131, 36, 0.18);
+}
+
+.confirmacion-kicker {
+    margin-bottom: 5px;
+    color: #a16207 !important;
+    font-size: 0.72rem !important;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.retiro-confirmacion-card h2 {
+    color: #854d0e;
+}
+
+.confirmacion-texto {
+    margin-bottom: 18px;
+}
+
+.retiro-confirmacion-datos {
+    display: grid;
+    gap: 9px;
+    margin-bottom: 20px;
+    padding: 14px;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    background: #fffbeb;
+    text-align: left;
+}
+
+.retiro-confirmacion-datos div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.retiro-confirmacion-datos span {
+    color: #78716c;
+    font-size: 0.8rem;
+}
+
+.retiro-confirmacion-datos strong {
+    max-width: 65%;
+    overflow: hidden;
+    color: #292524;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.retiro-confirmacion-datos div:last-child strong {
+    color: #b91c1c;
+    font-size: 1.05rem;
 }
 
 .auth-recovery-card {
@@ -1375,6 +1641,130 @@ th {
 
 .table-loan-in {
     border-top: 4px solid var(--teal);
+}
+
+.table-loan-in-paid {
+    border-top: 4px solid var(--green);
+}
+
+.resumen-deuda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin-top: 7px;
+    color: #64748b;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.resumen-deuda span:last-child {
+    color: #b45309;
+}
+
+.abono-deuda-card {
+    width: min(100%, 560px);
+}
+
+.abono-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 0 0 18px;
+}
+
+.abono-resumen>div {
+    display: grid;
+    gap: 4px;
+    padding: 11px 10px;
+    border: 1px solid #dbeafe;
+    border-radius: 9px;
+    background: #eff6ff;
+}
+
+.abono-resumen span {
+    color: #64748b;
+    font-size: 0.72rem;
+}
+
+.abono-resumen strong {
+    color: #1e3a8a;
+    font-size: 1rem;
+}
+
+.abono-resumen .abono-falta {
+    border-color: #fde68a;
+    background: #fffbeb;
+}
+
+.abono-resumen .abono-falta strong {
+    color: #b45309;
+}
+
+.abono-error {
+    margin-top: 7px;
+    color: #b91c1c;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.historial-abonos {
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.historial-abonos h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-size: 0.98rem;
+}
+
+.historial-abonos-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.historial-abonos-header h3 {
+    margin-bottom: 10px;
+}
+
+.lista-abonos {
+    display: grid;
+    gap: 7px;
+    max-height: 190px;
+    overflow-y: auto;
+}
+
+.abono-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 9px 11px;
+    border: 1px solid #dcfce7;
+    border-radius: 8px;
+    background: #f0fdf4;
+}
+
+.abono-item>div {
+    display: grid;
+    gap: 2px;
+}
+
+.abono-item strong {
+    color: #166534;
+}
+
+.abono-item span {
+    color: #64748b;
+    font-size: 0.75rem;
+}
+
+.abono-metodo {
+    color: #166534 !important;
+    font-weight: 700;
 }
 
 
@@ -1886,4 +2276,56 @@ th {
 
 .modal-cancelar-edicion-card h2 {
     color: #92400e;
+}
+
+.retiro-efectivo {
+    border-color: #fde68a !important;
+    background: #fffbeb !important;
+}
+
+.abono-item-final {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.abono-acciones {
+    display: flex;
+    gap: 4px;
+}
+
+.btn-abono-editar,
+.btn-abono-eliminar,
+.btn-abono-metodo {
+    width: 27px;
+    height: 27px;
+    border: 0;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-abono-editar {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.btn-abono-metodo {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.btn-abono-eliminar {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.btn-abono-editar:hover,
+.btn-abono-eliminar:hover,
+.btn-abono-metodo:hover {
+    filter: brightness(0.95);
+}
+
+.lista-abonos-completa {
+    max-height: min(65vh, 560px);
+    overflow-y: auto;
 }

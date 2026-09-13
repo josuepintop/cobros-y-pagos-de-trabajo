@@ -7,13 +7,19 @@ const PREFIJO_TIPO = '[tipo:';
 let registros = JSON.parse(localStorage.getItem('registros_cobros')) || [];
 let tarjetas = JSON.parse(localStorage.getItem('tarjetas_bancarias')) || [];
 let gananciasSemanales = JSON.parse(localStorage.getItem('ganancias_semanales')) || [];
+let retirosEfectivo = JSON.parse(localStorage.getItem('retiros_efectivo')) || [];
 
 const form = document.getElementById('registro-form');
+const mensajeSaldoRetiroForm = document.getElementById('mensaje-saldo-retiro-form');
+const saldoInsuficienteForm = document.getElementById('saldo-insuficiente-form');
+const textoSaldoRetiroForm = document.getElementById('texto-saldo-retiro-form');
 const tipoInput = document.getElementById('tipo');
 const clienteInput = document.getElementById('cliente');
 const montoInput = document.getElementById('monto');
 const descripcionInput = document.getElementById('descripcion');
 const fechaHoraInput = document.getElementById('fechaHora');
+const grupoCliente = document.getElementById('grupo-cliente');
+const grupoFecha = document.getElementById('grupo-fecha');
 const registroIdInput = document.getElementById('registro-id');
 const btnGuardar = document.getElementById('btn-guardar');
 const btnCancelar = document.getElementById('btn-cancelar');
@@ -46,10 +52,15 @@ const btnAgregarTarjeta = document.getElementById('btn-agregar-tarjeta');
 const montoTotalTarjetas = document.getElementById('monto-total-tarjetas');
 const montoTotalTarjetasResumen = document.getElementById('monto-total-tarjetas-resumen');
 const montoTotalGeneralElement = document.getElementById('monto-total-general');
+const montoEfectivoElement = document.getElementById('monto-efectivo');
+const resumenHistorialEfectivo = document.getElementById('resumen-historial-efectivo');
 const btnToggleTotales = document.getElementById('btn-toggle-totales');
 const btnToggleTotalTarjetas = document.getElementById('btn-toggle-total-tarjetas');
+const btnToggleEfectivo = document.getElementById('btn-toggle-efectivo');
+const btnVerHistorialEfectivo = document.getElementById('btn-ver-historial-efectivo');
 const tarjetaDestinoSelect = document.getElementById('tarjeta-destino');
 const grupoTarjeta = document.getElementById('grupo-tarjeta');
+const grupoTipo = document.getElementById('grupo-tipo');
 const modalAgregarTarjeta = document.getElementById('modal-agregar-tarjeta');
 const tituloModalTarjeta = document.getElementById('titulo-modal-tarjeta');
 const textoGuardarTarjeta = document.getElementById('texto-guardar-tarjeta');
@@ -82,14 +93,45 @@ const inputMontoCalendario = document.getElementById('input-monto-calendario');
 const selectDestinoCalendario = document.getElementById('select-destino-calendario');
 const tablaGananciasSemanales = document.getElementById('tabla-ganancias-semanales');
 const btnAgregarGananciaSemanal = document.getElementById('btn-agregar-ganancia-semanal');
-const btnAgregarDeudaCalendario = document.getElementById('btn-agregar-deuda-calendario');
 const btnVerHistorialCalendario = document.getElementById('btn-ver-historial-calendario');
 const modalHistorialCalendario = document.getElementById('modal-historial-calendario');
 const btnCerrarHistorialCalendario = document.getElementById('btn-cerrar-historial-calendario');
 const listaHistorialCalendarioCompleto = document.getElementById('lista-historial-calendario-completo');
+const modalRetiroEfectivo = document.getElementById('modal-retiro-efectivo');
+const btnCerrarRetiroEfectivo = document.getElementById('btn-cerrar-retiro-efectivo');
+const btnCancelarRetiroEfectivo = document.getElementById('btn-cancelar-retiro-efectivo');
+const btnGuardarRetiroEfectivo = document.getElementById('btn-guardar-retiro-efectivo');
+const inputMontoRetiroEfectivo = document.getElementById('input-monto-retiro-efectivo');
+const inputDescripcionRetiroEfectivo = document.getElementById('input-descripcion-retiro-efectivo');
+const detalleSaldoEfectivo = document.getElementById('detalle-saldo-efectivo');
+const historialRetirosEfectivo = document.getElementById('historial-retiros-efectivo');
+const modalConfirmarRetiroEfectivo = document.getElementById('modal-confirmar-retiro-efectivo');
+const btnCerrarConfirmarRetiroEfectivo = document.getElementById('btn-cerrar-confirmar-retiro-efectivo');
+const btnCancelarConfirmarRetiro = document.getElementById('btn-cancelar-confirmar-retiro');
+const btnConfirmarRetiroEfectivo = document.getElementById('btn-confirmar-retiro-efectivo');
+const confirmacionDescripcionRetiro = document.getElementById('confirmacion-descripcion-retiro');
+const confirmacionMontoRetiro = document.getElementById('confirmacion-monto-retiro');
+const mensajeErrorRetiroConfirmacion = document.getElementById('mensaje-error-retiro-confirmacion');
+const confirmacionSaldoInsuficiente = document.getElementById('confirmacion-saldo-insuficiente');
+const textoErrorRetiroConfirmacion = document.getElementById('texto-error-retiro-confirmacion');
 const modalHistorialRegistros = document.getElementById('modal-historial-registros');
 const btnCerrarHistorialRegistros = document.getElementById('btn-cerrar-historial-registros');
 const tablaHistorialRegistros = document.getElementById('tabla-historial-registros');
+const modalAbonoDeuda = document.getElementById('modal-abono-deuda');
+const btnCerrarAbonoDeuda = document.getElementById('btn-cerrar-abono-deuda');
+const btnCancelarAbonoDeuda = document.getElementById('btn-cancelar-abono-deuda');
+const btnContinuarAbonoDeuda = document.getElementById('btn-continuar-abono-deuda');
+const inputMontoAbono = document.getElementById('input-monto-abono');
+const inputDescripcionAbono = document.getElementById('input-descripcion-abono');
+const mensajeAbonoInvalido = document.getElementById('mensaje-abono-invalido');
+const abonoTotalDeuda = document.getElementById('abono-total-deuda');
+const abonoTotalPagado = document.getElementById('abono-total-pagado');
+const abonoTotalFalta = document.getElementById('abono-total-falta');
+const listaAbonosDeuda = document.getElementById('lista-abonos-deuda');
+const btnVerHistorialAbonos = document.getElementById('btn-ver-historial-abonos');
+const modalHistorialAbonos = document.getElementById('modal-historial-abonos');
+const btnCerrarHistorialAbonos = document.getElementById('btn-cerrar-historial-abonos');
+const listaHistorialAbonosCompleto = document.getElementById('lista-historial-abonos-completo');
 const botonesHistorialSeccion = document.querySelectorAll('[data-historial-seccion]');
 const checkboxEntrelazarDias = document.getElementById('checkbox-entrelazar-dias');
 const checkboxMultiplesTrabajos = document.getElementById('checkbox-multiples-trabajos');
@@ -111,8 +153,18 @@ let gananciaPendienteDeEliminar = null;
 let temporizadorBloqueo = null;
 let registroPendienteDeGuardar = null;
 let tarjetaSeleccionadaPendiente = null;
+let modoCobrarRecibido = false;
+let modoAbonoDeuda = false;
+let deudaEnAbono = null;
+let montoAbonoPendiente = 0;
+let abonoEnEdicion = null;
+let deudaHistorialAbonos = null;
+let abonoEnCambioMetodo = null;
+let modoCambioMetodoAbono = false;
 let tarjetaDetalleActiva = null;
 let retiroEnEdicion = null;
+let retiroEfectivoEnEdicion = null;
+let fechaRetiroEfectivoActual = '';
 let gananciaEnEdicion = null;
 let tarjetaEnEdicion = null;
 let guardandoTarjeta = false;
@@ -130,11 +182,13 @@ const CLAVE_INTENTOS_RECUPERACION = 'intentos_recuperacion_cobros';
 const CLAVE_BLOQUEO_RECUPERACION = 'bloqueo_recuperacion_cobros';
 const CLAVE_TOTAL_GENERAL_OCULTO = 'total_general_cobros_oculto';
 const CLAVE_TOTAL_TARJETAS_OCULTO = 'total_tarjetas_cobros_oculto';
+const CLAVE_EFECTIVO_OCULTO = 'efectivo_cobros_oculto';
 const CLAVE_TOTALES_OCULTOS_ANTIGUA = 'totales_cobros_ocultos';
 const MARCADOR_PREFERENCIAS_VISIBILIDAD = '[tipo:preferencias_visibilidad]';
 const preferenciaOcultaAntigua = localStorage.getItem(CLAVE_TOTALES_OCULTOS_ANTIGUA) === 'true';
 let totalGeneralOculto = localStorage.getItem(CLAVE_TOTAL_GENERAL_OCULTO) === 'true' || preferenciaOcultaAntigua;
 let totalTarjetasOculto = localStorage.getItem(CLAVE_TOTAL_TARJETAS_OCULTO) === 'true' || preferenciaOcultaAntigua;
+let efectivoOculto = localStorage.getItem(CLAVE_EFECTIVO_OCULTO) === 'true' || preferenciaOcultaAntigua;
 let idPreferenciasVisibilidad = null;
 let contrasenaActual = localStorage.getItem('contrasena_cobros') || CONTRASENA_POR_DEFECTO;
 let codigoRecuperacionVerificado = false;
@@ -429,6 +483,26 @@ function actualizarMontoTotalTarjetas() {
     montoTotalTarjetasResumen.textContent = valor;
 }
 
+function calcularEfectivoDisponible() {
+    let efectivo = 0;
+    const movimientos = [...registros, ...gananciasSemanales];
+    movimientos.forEach(item => {
+        const pagado = item.tipo === 'ganancia_semanal' ? item.estado === 'pagado' : item.tipo === 'cobrado' || item.tipo === 'recibido' && item.estado === 'pagado' || item.estado === 'pagado';
+        if (item.tipo === 'deuda' && Array.isArray(item.abonos)) {
+            efectivo -= item.abonos
+                .filter(abono => abono.metodo === 'efectivo')
+                .reduce((total, abono) => total + (Number(abono.monto) || 0), 0);
+        }
+        if (!pagado) return;
+        if (item.destinoEfectivo && (item.tipo === 'cobrado' || item.tipo === 'recibido')) efectivo += Number(item.monto) || 0;
+        if (item.origenEfectivo && item.tipo !== 'recibido' && !(item.tipo === 'deuda' && item.abonos?.length)) efectivo -= Number(item.monto) || 0;
+    });
+    retirosEfectivo.forEach(retiro => {
+        efectivo -= Number(retiro.monto) || 0;
+    });
+    return efectivo;
+}
+
 function actualizarVisibilidadTotales() {
     const actualizarBoton = (boton, oculto, texto) => {
         if (!boton) return;
@@ -440,7 +514,16 @@ function actualizarVisibilidadTotales() {
 
     actualizarBoton(btnToggleTotales, totalGeneralOculto, 'el monto total que tienes');
     actualizarBoton(btnToggleTotalTarjetas, totalTarjetasOculto, 'el total en tarjetas');
+    actualizarBoton(btnToggleEfectivo, efectivoOculto, 'el efectivo disponible');
     actualizarMontoTotalTarjetas();
+    actualizarMontoEfectivo();
+}
+
+function actualizarMontoEfectivo() {
+    const efectivo = calcularEfectivoDisponible();
+    const valor = efectivoOculto ? '••••••' : `$${efectivo.toFixed(2)}`;
+    montoEfectivoElement.textContent = valor;
+    detalleSaldoEfectivo.textContent = `$${efectivo.toFixed(2)}`;
 }
 
 function alternarVisibilidadTotalGeneral() {
@@ -460,6 +543,12 @@ function alternarVisibilidadTotalTarjetas() {
 
 btnToggleTotales.addEventListener('click', alternarVisibilidadTotalGeneral);
 btnToggleTotalTarjetas.addEventListener('click', alternarVisibilidadTotalTarjetas);
+btnToggleEfectivo.addEventListener('click', function() {
+    efectivoOculto = !efectivoOculto;
+    localStorage.setItem(CLAVE_EFECTIVO_OCULTO, String(efectivoOculto));
+    actualizarVisibilidadTotales();
+    guardarPreferenciasVisibilidad();
+});
 
 function actualizarSelectorTarjetas() {
     const opcionesActuales = Array.from(tarjetaDestinoSelect.querySelectorAll('option')).slice(1);
@@ -838,26 +927,405 @@ function eliminarRetiroTarjeta(id) {
     btnCancelarEliminacion.focus();
 }
 
+function renderHistorialRetirosEfectivo() {
+    const retiros = [...retirosEfectivo].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+    historialRetirosEfectivo.innerHTML = retiros.length === 0
+        ? '<p class="historial-vacio">Todavía no hay retiros registrados.</p>'
+        : retiros.map(retiro => `
+            <div class="retiro-item">
+                <div><strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')}</strong><span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+                <div class="retiro-datos"><b>-$${Number(retiro.monto).toFixed(2)}</b><div class="retiro-acciones">
+                    <button type="button" class="btn-retiro-editar" data-retiro-efectivo-editar="${retiro.id}" title="Editar retiro" aria-label="Editar retiro"><i class="fa-solid fa-pen"></i></button>
+                    <button type="button" class="btn-retiro-eliminar" data-retiro-efectivo-eliminar="${retiro.id}" title="Eliminar retiro" aria-label="Eliminar retiro"><i class="fa-solid fa-xmark"></i></button>
+                </div></div>
+            </div>`).join('');
+}
+
+function crearHtmlRetiroEfectivo(retiro) {
+    return `
+        <div class="cash-history-item">
+            <div class="cash-history-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+            <div class="cash-history-data">
+                <strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')}</strong>
+                <span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span>
+            </div>
+            <b>-$${Number(retiro.monto).toFixed(2)}</b>
+        </div>`;
+}
+
+function renderResumenHistorialEfectivo() {
+    const retiros = [...retirosEfectivo]
+        .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora))
+        .slice(0, 3);
+    resumenHistorialEfectivo.innerHTML = retiros.length === 0
+        ? `<div class="cash-history-empty"><i class="fa-solid fa-wallet"></i><strong>Aún no hay retiros de efectivo</strong><span>Cuando registres una salida, aquí aparecerán tus últimos movimientos.</span></div>`
+        : retiros.map(crearHtmlRetiroEfectivo).join('');
+}
+
+function abrirHistorialRetirosEfectivo() {
+    const retiros = [...retirosEfectivo].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+    document.getElementById('titulo-historial-retiros').innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> Historial de efectivo';
+    listaHistorialRetirosCompleto.innerHTML = retiros.length === 0
+        ? '<p class="historial-vacio">Todavía no hay retiros registrados.</p>'
+        : retiros.map(retiro => crearHtmlRetiroEfectivo(retiro)).join('');
+    modalHistorialRetiros.hidden = false;
+    modalHistorialRetiros.style.display = 'flex';
+}
+
+function abrirModalRetiroEfectivo() {
+    retiroEfectivoEnEdicion = null;
+    fechaRetiroEfectivoActual = obtenerFechaHoraLocal();
+    inputMontoRetiroEfectivo.value = '';
+    inputDescripcionRetiroEfectivo.value = '';
+    btnGuardarRetiroEfectivo.innerHTML = '<i class="fa-solid fa-check"></i> Guardar retiro';
+    actualizarMontoEfectivo();
+    renderHistorialRetirosEfectivo();
+    modalRetiroEfectivo.hidden = false;
+    modalRetiroEfectivo.style.display = 'flex';
+    inputMontoRetiroEfectivo.focus();
+}
+
+function cerrarModalRetiroEfectivo() {
+    modalRetiroEfectivo.hidden = true;
+    modalRetiroEfectivo.style.display = 'none';
+    retiroEfectivoEnEdicion = null;
+}
+
+function abrirConfirmacionRetiroEfectivo(monto, descripcion, fechaHora) {
+    fechaRetiroEfectivoActual = fechaHora || obtenerFechaHoraLocal();
+    inputMontoRetiroEfectivo.value = monto;
+    inputDescripcionRetiroEfectivo.value = descripcion;
+    mensajeErrorRetiroConfirmacion.hidden = true;
+    confirmacionSaldoInsuficiente.hidden = true;
+    confirmacionDescripcionRetiro.textContent = descripcion;
+    confirmacionMontoRetiro.textContent = `$${Number(monto).toFixed(2)}`;
+    modalConfirmarRetiroEfectivo.hidden = false;
+    modalConfirmarRetiroEfectivo.style.display = 'flex';
+    btnConfirmarRetiroEfectivo.focus();
+}
+
+function cerrarConfirmacionRetiroEfectivo() {
+    modalConfirmarRetiroEfectivo.hidden = true;
+    modalConfirmarRetiroEfectivo.style.display = 'none';
+}
+
+function limpiarAvisosSaldoRetiro() {
+    mensajeSaldoRetiroForm.hidden = true;
+    saldoInsuficienteForm.hidden = true;
+    mensajeErrorRetiroConfirmacion.hidden = true;
+    confirmacionSaldoInsuficiente.hidden = true;
+}
+
+function mostrarSaldoInsuficienteEnFormulario(monto, saldoDisponible) {
+    const faltante = Math.max(0, monto - saldoDisponible);
+    textoSaldoRetiroForm.textContent = `El retiro no puede ser mayor que el efectivo disponible. Faltan $${faltante.toFixed(2)} para realizar este retiro.`;
+    saldoInsuficienteForm.querySelector('span').textContent = `Saldo insuficiente. Faltan $${faltante.toFixed(2)}.`;
+    mensajeSaldoRetiroForm.hidden = false;
+    saldoInsuficienteForm.hidden = false;
+    montoInput.focus();
+}
+
+function mostrarSaldoInsuficienteEnConfirmacion(monto, saldoDisponible) {
+    const faltante = Math.max(0, monto - saldoDisponible);
+    textoErrorRetiroConfirmacion.textContent = `El retiro no puede ser mayor que el efectivo disponible. Faltan $${faltante.toFixed(2)} para realizar este retiro.`;
+    confirmacionSaldoInsuficiente.querySelector('span').textContent = `Saldo insuficiente. Faltan $${faltante.toFixed(2)}.`;
+    mensajeErrorRetiroConfirmacion.hidden = false;
+    confirmacionSaldoInsuficiente.hidden = false;
+}
+
+async function guardarRetiroEfectivo() {
+    const monto = Number(inputMontoRetiroEfectivo.value);
+    const descripcion = inputDescripcionRetiroEfectivo.value.trim();
+    const fechaHora = fechaRetiroEfectivoActual || obtenerFechaHoraLocal();
+    if (!descripcion) {
+        alert('Escribe una descripción para el retiro.');
+        inputDescripcionRetiroEfectivo.focus();
+        return;
+    }
+    const saldoDisponible = calcularEfectivoDisponible() + (retiroEfectivoEnEdicion ? Number(retiroEfectivoEnEdicion.monto) : 0);
+    if (!Number.isFinite(monto) || monto <= 0) {
+        alert('Ingresa un monto de retiro válido.');
+        return;
+    }
+    if (monto > saldoDisponible) {
+        mostrarSaldoInsuficienteEnConfirmacion(monto, saldoDisponible);
+        return;
+    }
+    if (!fechaHora) {
+        alert('Selecciona la fecha y hora del retiro.');
+        return;
+    }
+
+    const retiro = retiroEfectivoEnEdicion || {
+        id: undefined,
+        tipo: 'retiro_efectivo',
+        cliente: 'Retiro de efectivo',
+        enCalendario: true
+    };
+    retiro.monto = monto;
+    retiro.descripcion = descripcion;
+    retiro.fechaHora = fechaHora;
+    retiro.estado = 'pagado';
+    const id = await guardarRegistroEnSupabase(retiro);
+    if (!id) return;
+    retiro.id = id;
+    if (!retiroEfectivoEnEdicion) retirosEfectivo.unshift(retiro);
+    localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+    guardarYActualizar();
+    resetFormulario();
+    cerrarConfirmacionRetiroEfectivo();
+}
+
+function editarRetiroEfectivo(id) {
+    const retiro = retirosEfectivo.find(item => item.id === id);
+    if (!retiro) return;
+    retiroEfectivoEnEdicion = retiro;
+    inputMontoRetiroEfectivo.value = retiro.monto;
+    inputDescripcionRetiroEfectivo.value = retiro.descripcion || '';
+    fechaRetiroEfectivoActual = retiro.fechaHora;
+    btnGuardarRetiroEfectivo.innerHTML = '<i class="fa-solid fa-check"></i> Guardar cambios';
+    inputMontoRetiroEfectivo.focus();
+}
+
+function eliminarRetiroEfectivo(id) {
+    const retiro = retirosEfectivo.find(item => item.id === id);
+    if (!retiro) return;
+    retiroPendienteDeEliminar = { efectivo: true, retiro };
+    modalTituloEliminacion.textContent = '¿Eliminar este retiro de efectivo?';
+    modalMensajeEliminacion.textContent = 'El monto volverá al efectivo disponible.';
+    modalEliminar.hidden = false;
+    btnCancelarEliminacion.focus();
+}
+
+btnCerrarRetiroEfectivo.addEventListener('click', cerrarModalRetiroEfectivo);
+btnCancelarRetiroEfectivo.addEventListener('click', cerrarModalRetiroEfectivo);
+modalRetiroEfectivo.addEventListener('click', event => {
+    if (event.target === modalRetiroEfectivo) cerrarModalRetiroEfectivo();
+});
+btnGuardarRetiroEfectivo.addEventListener('click', guardarRetiroEfectivo);
+btnVerHistorialEfectivo.addEventListener('click', abrirHistorialRetirosEfectivo);
+btnCerrarConfirmarRetiroEfectivo.addEventListener('click', cerrarConfirmacionRetiroEfectivo);
+btnCancelarConfirmarRetiro.addEventListener('click', cerrarConfirmacionRetiroEfectivo);
+btnConfirmarRetiroEfectivo.addEventListener('click', guardarRetiroEfectivo);
+modalConfirmarRetiroEfectivo.addEventListener('click', event => {
+    if (event.target === modalConfirmarRetiroEfectivo) cerrarConfirmacionRetiroEfectivo();
+});
+historialRetirosEfectivo.addEventListener('click', event => {
+    const editar = event.target.closest('[data-retiro-efectivo-editar]');
+    const eliminar = event.target.closest('[data-retiro-efectivo-eliminar]');
+    if (editar) editarRetiroEfectivo(editar.dataset.retiroEfectivoEditar);
+    if (eliminar) eliminarRetiroEfectivo(eliminar.dataset.retiroEfectivoEliminar);
+});
+
+function obtenerTotalAbonado(deuda) {
+    return (deuda.abonos || []).reduce((total, abono) => total + (Number(abono.monto) || 0), 0);
+}
+
+function obtenerSaldoDeuda(deuda) {
+    return Math.max(0, Number(deuda.monto || 0) - obtenerTotalAbonado(deuda));
+}
+
+function obtenerPagosPorTarjeta(deuda) {
+    const pagos = {};
+    if (Array.isArray(deuda.abonos) && deuda.abonos.length > 0) {
+        deuda.abonos.forEach(abono => {
+            if (abono.metodo && abono.metodo !== 'efectivo' && abono.metodo !== 'sin_asignar') {
+                pagos[abono.metodo] = (pagos[abono.metodo] || 0) + (Number(abono.monto) || 0);
+            }
+        });
+    } else if (deuda.origenTarjetaId) {
+        pagos[deuda.origenTarjetaId] = Number(deuda.monto) || 0;
+    }
+    return pagos;
+}
+
+function renderAbonosDeuda(deuda, limite = 3, contenedor = listaAbonosDeuda) {
+    const abonos = [...(deuda.abonos || [])].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+    const abonosVisibles = limite ? abonos.slice(0, limite) : abonos;
+    contenedor.innerHTML = abonos.length === 0
+        ? '<p class="historial-vacio">Todavía no hay abonos registrados.</p>'
+        : abonosVisibles.map(abono => `
+            <div class="abono-item">
+                <div><strong>$${Number(abono.monto).toFixed(2)}</strong><span>${abono.descripcion || 'Abono'} · ${new Date(abono.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+                <div class="abono-item-final"><span class="abono-metodo">${abono.metodoNombre || 'Sin asignar'}</span><div class="abono-acciones"><button type="button" class="btn-abono-metodo" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Cambiar método de pago"><i class="fa-solid fa-wallet"></i></button><button type="button" class="btn-abono-editar" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Editar abono"><i class="fa-solid fa-pen"></i></button><button type="button" class="btn-abono-eliminar" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Eliminar abono"><i class="fa-solid fa-xmark"></i></button></div></div>
+            </div>`).join('');
+}
+
+function actualizarResumenAbono(deuda) {
+    abonoTotalDeuda.textContent = `$${Number(deuda.monto).toFixed(2)}`;
+    abonoTotalPagado.textContent = `$${obtenerTotalAbonado(deuda).toFixed(2)}`;
+    abonoTotalFalta.textContent = `$${obtenerSaldoDeuda(deuda).toFixed(2)}`;
+}
+
+function abrirModalAbonoDeuda(id) {
+    const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
+    if (!deuda || deuda.estado === 'pagado') return;
+    deuda.abonos = Array.isArray(deuda.abonos) ? deuda.abonos : [];
+    deudaEnAbono = deuda;
+    deudaHistorialAbonos = deuda;
+    abonoEnEdicion = null;
+    inputMontoAbono.value = '';
+    inputDescripcionAbono.value = '';
+    mensajeAbonoInvalido.hidden = true;
+    btnContinuarAbonoDeuda.innerHTML = '<i class="fa-solid fa-arrow-right"></i> Elegir forma de pago';
+    actualizarResumenAbono(deuda);
+    renderAbonosDeuda(deuda);
+    modalAbonoDeuda.hidden = false;
+    modalAbonoDeuda.style.display = 'flex';
+    inputMontoAbono.focus();
+}
+
+function cerrarModalAbonoDeuda(reiniciar = true) {
+    modalAbonoDeuda.hidden = true;
+    modalAbonoDeuda.style.display = 'none';
+    if (reiniciar) {
+        deudaEnAbono = null;
+        montoAbonoPendiente = 0;
+        abonoEnEdicion = null;
+    }
+}
+
+async function continuarAbonoDeuda() {
+    if (!deudaEnAbono) return;
+    const monto = Number(inputMontoAbono.value);
+    const saldo = obtenerSaldoDeuda(deudaEnAbono) + (abonoEnEdicion ? Number(abonoEnEdicion.monto) : 0);
+    if (!Number.isFinite(monto) || monto <= 0 || monto > saldo) {
+        mensajeAbonoInvalido.textContent = monto > saldo
+            ? `El abono no puede superar el saldo pendiente de $${saldo.toFixed(2)}.`
+            : 'Ingresa un monto de abono válido.';
+        mensajeAbonoInvalido.hidden = false;
+        inputMontoAbono.focus();
+        return;
+    }
+    if (abonoEnEdicion) {
+        abonoEnEdicion.monto = monto;
+        abonoEnEdicion.descripcion = inputDescripcionAbono.value.trim() || 'Abono';
+        deudaEnAbono.estado = obtenerSaldoDeuda(deudaEnAbono) <= 0.009 ? 'pagado' : 'pendiente';
+        await guardarRegistroEnSupabase(deudaEnAbono);
+        guardarYActualizar();
+        cerrarModalAbonoDeuda();
+        return;
+    }
+    montoAbonoPendiente = monto;
+    const descripcionAbonoPendiente = inputDescripcionAbono.value.trim() || 'Abono';
+    modoAbonoDeuda = true;
+    registroPendienteDeGuardar = deudaEnAbono;
+    deudaEnAbono.descripcionAbonoPendiente = descripcionAbonoPendiente;
+    cerrarModalAbonoDeuda(false);
+    mostrarModalSeleccionarTarjeta();
+}
+
+function abrirHistorialAbonos() {
+    if (!deudaHistorialAbonos) return;
+    renderAbonosDeuda(deudaHistorialAbonos, 0, listaHistorialAbonosCompleto);
+    modalHistorialAbonos.hidden = false;
+    modalHistorialAbonos.style.display = 'flex';
+}
+
+function cerrarHistorialAbonos() {
+    modalHistorialAbonos.hidden = true;
+    modalHistorialAbonos.style.display = 'none';
+}
+
+function editarAbonoDeuda(deudaId, abonoId) {
+    const deuda = registros.find(registro => registro.id === deudaId);
+    const abono = deuda?.abonos?.find(item => item.id === abonoId);
+    if (!deuda || !abono) return;
+    deudaEnAbono = deuda;
+    abonoEnEdicion = abono;
+    inputMontoAbono.value = abono.monto;
+    inputDescripcionAbono.value = abono.descripcion || '';
+    mensajeAbonoInvalido.hidden = true;
+    actualizarResumenAbono(deuda);
+    renderAbonosDeuda(deuda);
+    btnContinuarAbonoDeuda.innerHTML = '<i class="fa-solid fa-check"></i> Guardar cambios';
+    modalAbonoDeuda.hidden = false;
+    modalAbonoDeuda.style.display = 'flex';
+    inputMontoAbono.focus();
+}
+
+function cambiarMetodoAbono(deudaId, abonoId) {
+    const deuda = registros.find(registro => registro.id === deudaId);
+    const abono = deuda?.abonos?.find(item => item.id === abonoId);
+    if (!deuda || !abono) return;
+    abonoEnCambioMetodo = abono;
+    modoCambioMetodoAbono = true;
+    registroPendienteDeGuardar = deuda;
+    mostrarModalSeleccionarTarjeta();
+}
+
+async function eliminarAbonoDeuda(deudaId, abonoId) {
+    const deuda = registros.find(registro => registro.id === deudaId);
+    if (!deuda || !Array.isArray(deuda.abonos)) return;
+    if (!window.confirm('¿Eliminar este abono? El saldo pendiente volverá a aumentar.')) return;
+    deuda.abonos = deuda.abonos.filter(abono => abono.id !== abonoId);
+    deuda.estado = obtenerSaldoDeuda(deuda) <= 0.009 ? 'pagado' : 'pendiente';
+    await guardarRegistroEnSupabase(deuda);
+    guardarYActualizar();
+    if (deudaEnAbono?.id === deuda.id) {
+        actualizarResumenAbono(deuda);
+        renderAbonosDeuda(deuda);
+    }
+    if (deudaHistorialAbonos?.id === deuda.id) renderAbonosDeuda(deuda, 0, listaHistorialAbonosCompleto);
+}
+
+btnCerrarAbonoDeuda.addEventListener('click', cerrarModalAbonoDeuda);
+btnCancelarAbonoDeuda.addEventListener('click', cerrarModalAbonoDeuda);
+btnContinuarAbonoDeuda.addEventListener('click', continuarAbonoDeuda);
+btnVerHistorialAbonos.addEventListener('click', abrirHistorialAbonos);
+btnCerrarHistorialAbonos.addEventListener('click', cerrarHistorialAbonos);
+listaAbonosDeuda.addEventListener('click', event => {
+    const editar = event.target.closest('[data-abono-id]');
+    if (editar && event.target.closest('.btn-abono-editar')) editarAbonoDeuda(editar.dataset.deudaId, editar.dataset.abonoId);
+    if (editar && event.target.closest('.btn-abono-metodo')) cambiarMetodoAbono(editar.dataset.deudaId, editar.dataset.abonoId);
+    if (editar && event.target.closest('.btn-abono-eliminar')) eliminarAbonoDeuda(editar.dataset.deudaId, editar.dataset.abonoId);
+});
+listaHistorialAbonosCompleto.addEventListener('click', event => {
+    const accion = event.target.closest('[data-abono-id]');
+    if (!accion) return;
+    if (event.target.closest('.btn-abono-editar')) editarAbonoDeuda(accion.dataset.deudaId, accion.dataset.abonoId);
+    if (event.target.closest('.btn-abono-metodo')) cambiarMetodoAbono(accion.dataset.deudaId, accion.dataset.abonoId);
+    if (event.target.closest('.btn-abono-eliminar')) eliminarAbonoDeuda(accion.dataset.deudaId, accion.dataset.abonoId);
+});
+modalAbonoDeuda.addEventListener('click', event => {
+    if (event.target === modalAbonoDeuda) cerrarModalAbonoDeuda();
+});
+
 // Funciones para el modal de seleccionar tarjeta al guardar cobro
 function mostrarModalSeleccionarTarjeta() {
     mensajeSaldoInsuficiente.hidden = true;
     opcionesTarjetas.innerHTML = '';
     const esDineroPrestado = registroPendienteDeGuardar?.tipo === 'prestado';
+    const esDineroRecibido = registroPendienteDeGuardar?.tipo === 'recibido';
     const esDeuda = registroPendienteDeGuardar?.tipo === 'deuda';
+    const esCobroRecibido = esDineroRecibido && modoCobrarRecibido;
+    const esAbonoDeuda = esDeuda && modoAbonoDeuda;
     const tituloModal = modalSeleccionarTarjeta.querySelector('.modal-header h2');
     const textoModal = modalSeleccionarTarjeta.querySelector('.modal-body p');
-    tituloModal.innerHTML = esDeuda
+    tituloModal.innerHTML = esAbonoDeuda
+        ? '<i class="fa-solid fa-coins"></i> ¿De dónde pagarás este abono?'
+        : esCobroRecibido
+        ? '<i class="fa-solid fa-hand-holding-dollar"></i> ¿A dónde mandarás el dinero cobrado?'
+        : esDeuda
         ? '<i class="fa-solid fa-file-invoice-dollar"></i> ¿Cómo pagarás esta deuda?'
         : esDineroPrestado
         ? '<i class="fa-solid fa-money-bill-transfer"></i> ¿De dónde sale este dinero?'
+        : esDineroRecibido
+        ? '<i class="fa-solid fa-hand-holding-hand"></i> ¿Dónde recibiste este dinero?'
         : '<i class="fa-solid fa-circle-question"></i> ¿A dónde va este dinero?';
-    textoModal.textContent = esDeuda
+    textoModal.textContent = esAbonoDeuda
+        ? 'Elige efectivo, una tarjeta o deja este abono sin asignar.'
+        : esCobroRecibido
+        ? 'Selecciona si el dinero irá a efectivo, una tarjeta o quedará sin asignar.'
+        : esDeuda
         ? 'Elige efectivo, una tarjeta o deja el pago sin asignar.'
         : esDineroPrestado
         ? 'Selecciona la tarjeta de donde saldrá el dinero o elige efectivo.'
+        : esDineroRecibido
+        ? 'Elige efectivo, una tarjeta o deja el dinero sin asignar.'
         : 'Selecciona a qué tarjeta o cuenta quieres enviar este monto';
 
-    if (esDeuda) {
+    if (esDeuda || esDineroRecibido) {
         const opcionSinAsignar = document.createElement('div');
         opcionSinAsignar.className = 'opcion-tarjeta';
         opcionSinAsignar.innerHTML = `
@@ -934,6 +1402,12 @@ function cerrarModalSeleccionarTarjeta() {
     registroPendienteDeGuardar = null;
     tarjetaSeleccionadaPendiente = null;
     deudaEnReasignacion = null;
+    modoCobrarRecibido = false;
+    modoAbonoDeuda = false;
+    modoCambioMetodoAbono = false;
+    abonoEnCambioMetodo = null;
+    deudaEnAbono = null;
+    montoAbonoPendiente = 0;
 }
 
 async function confirmarGuardarCobro() {
@@ -941,8 +1415,16 @@ async function confirmarGuardarCobro() {
     
     const nuevoRegistro = registroPendienteDeGuardar;
     const esDineroPrestado = nuevoRegistro.tipo === 'prestado';
+    const esDineroRecibido = nuevoRegistro.tipo === 'recibido';
+    const esCobroRecibido = esDineroRecibido && modoCobrarRecibido;
     const esDeuda = nuevoRegistro.tipo === 'deuda';
-    if (esDineroPrestado && !tarjetaSeleccionadaPendiente) {
+    const esAbonoDeuda = esDeuda && modoAbonoDeuda;
+    const esCambioMetodoAbono = esDeuda && modoCambioMetodoAbono && abonoEnCambioMetodo;
+    const saldoAntesDePago = esDeuda ? obtenerSaldoDeuda(nuevoRegistro) : Number(nuevoRegistro.monto);
+    const montoOperacion = esAbonoDeuda
+        ? montoAbonoPendiente
+        : deudaEnReasignacion?.montoPagado || saldoAntesDePago;
+    if ((esDineroPrestado || esDineroRecibido || esDeuda) && !tarjetaSeleccionadaPendiente) {
         alert('Selecciona la tarjeta de donde saldrá el dinero o elige efectivo.');
         return;
     }
@@ -951,11 +1433,64 @@ async function confirmarGuardarCobro() {
         return;
     }
     const esPagoSinAsignar = esDeuda && tarjetaSeleccionadaPendiente === 'sin_asignar';
-    if (esPagoSinAsignar) {
-        nuevoRegistro.estado = 'pendiente';
+    if (esDeuda && !esAbonoDeuda && !esPagoSinAsignar) {
+        nuevoRegistro.estado = 'pagado';
     }
     const tarjetaDestino = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
-    if (tarjetaDestino && (esDineroPrestado || esDeuda)) {
+    if (esCambioMetodoAbono) {
+        const metodoAnterior = abonoEnCambioMetodo.metodo;
+        const montoCambio = Number(abonoEnCambioMetodo.monto) || 0;
+        const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === metodoAnterior);
+        if (tarjetaDestino && tarjetaDestino.id !== (tarjetaAnterior && tarjetaAnterior.id) && tarjetaDestino.monto < montoCambio) {
+            detalleSaldoInsuficiente.textContent = `La tarjeta tiene $${tarjetaDestino.monto.toFixed(2)} disponibles y necesitas $${montoCambio.toFixed(2)} para este abono.`;
+            mensajeSaldoInsuficiente.hidden = false;
+            return;
+        }
+        if (tarjetaAnterior && tarjetaAnterior.id !== (tarjetaDestino && tarjetaDestino.id)) tarjetaAnterior.monto += montoCambio;
+        if (tarjetaDestino && tarjetaDestino.id !== (tarjetaAnterior && tarjetaAnterior.id)) tarjetaDestino.monto -= montoCambio;
+        abonoEnCambioMetodo.metodo = tarjetaSeleccionadaPendiente;
+        abonoEnCambioMetodo.metodoNombre = tarjetaSeleccionadaPendiente === 'efectivo'
+            ? 'Efectivo'
+            : tarjetaDestino?.nombre || (tarjetaSeleccionadaPendiente === 'sin_asignar' ? 'Sin asignar' : 'Tarjeta');
+        await guardarRegistroEnSupabase(nuevoRegistro);
+        guardarTarjetas();
+        guardarYActualizar();
+        cerrarModalSeleccionarTarjeta();
+        return;
+    }
+    if (esAbonoDeuda) {
+        nuevoRegistro.abonos = Array.isArray(nuevoRegistro.abonos) ? nuevoRegistro.abonos : [];
+        const metodoNombre = tarjetaSeleccionadaPendiente === 'efectivo'
+            ? 'Efectivo'
+            : tarjetaDestino?.nombre || (tarjetaSeleccionadaPendiente === 'sin_asignar' ? 'Sin asignar' : 'Tarjeta');
+        nuevoRegistro.abonos.push({
+            id: Date.now().toString(),
+            monto: montoOperacion,
+            fechaHora: obtenerFechaHoraLocal(),
+            metodo: tarjetaSeleccionadaPendiente,
+            metodoNombre,
+            descripcion: nuevoRegistro.descripcionAbonoPendiente || 'Abono'
+        });
+        delete nuevoRegistro.descripcionAbonoPendiente;
+        nuevoRegistro.estado = obtenerSaldoDeuda(nuevoRegistro) <= 0.009 ? 'pagado' : 'pendiente';
+    } else if (esDeuda && !deudaEnReasignacion && montoOperacion > 0) {
+        nuevoRegistro.abonos = Array.isArray(nuevoRegistro.abonos) ? nuevoRegistro.abonos : [];
+        nuevoRegistro.abonos.push({
+            id: Date.now().toString(),
+            monto: montoOperacion,
+            fechaHora: obtenerFechaHoraLocal(),
+            metodo: tarjetaSeleccionadaPendiente,
+            metodoNombre: tarjetaSeleccionadaPendiente === 'efectivo' ? 'Efectivo' : tarjetaDestino?.nombre || (tarjetaSeleccionadaPendiente === 'sin_asignar' ? 'Sin asignar' : 'Tarjeta')
+        });
+    } else if (esCobroRecibido) {
+        nuevoRegistro.estado = 'pagado';
+        nuevoRegistro.origenTarjetaId = null;
+        nuevoRegistro.origenTarjetaNombre = '';
+        nuevoRegistro.origenEfectivo = false;
+        nuevoRegistro.tarjetaDestinoId = tarjetaDestino ? tarjetaDestino.id : null;
+        nuevoRegistro.tarjetaDestinoNombre = tarjetaDestino ? tarjetaDestino.nombre : '';
+        nuevoRegistro.destinoEfectivo = tarjetaSeleccionadaPendiente === 'efectivo';
+    } else if (tarjetaDestino && (esDineroPrestado || esDineroRecibido || esDeuda)) {
         nuevoRegistro.origenTarjetaId = tarjetaDestino.id;
         nuevoRegistro.origenTarjetaNombre = tarjetaDestino.nombre;
         nuevoRegistro.origenEfectivo = false;
@@ -963,11 +1498,11 @@ async function confirmarGuardarCobro() {
         nuevoRegistro.tarjetaDestinoId = tarjetaDestino.id;
         nuevoRegistro.tarjetaDestinoNombre = tarjetaDestino.nombre;
         nuevoRegistro.destinoEfectivo = false;
-    } else if (tarjetaSeleccionadaPendiente === 'efectivo' && (esDineroPrestado || esDeuda)) {
+    } else if (tarjetaSeleccionadaPendiente === 'efectivo' && (esDineroPrestado || esDineroRecibido || esDeuda)) {
         nuevoRegistro.origenTarjetaId = null;
         nuevoRegistro.origenTarjetaNombre = '';
         nuevoRegistro.origenEfectivo = true;
-    } else if (esDeuda && tarjetaSeleccionadaPendiente === 'sin_asignar') {
+    } else if ((esDeuda || esDineroRecibido) && tarjetaSeleccionadaPendiente === 'sin_asignar') {
         nuevoRegistro.origenTarjetaId = null;
         nuevoRegistro.origenTarjetaNombre = '';
         nuevoRegistro.origenEfectivo = false;
@@ -977,15 +1512,15 @@ async function confirmarGuardarCobro() {
         nuevoRegistro.destinoEfectivo = true;
     }
 
-    if ((esDineroPrestado || esDeuda) && tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'efectivo' && tarjetaSeleccionadaPendiente !== 'sin_asignar') {
+    if (!deudaEnReasignacion && (esAbonoDeuda || (!esCobroRecibido && (esDineroPrestado || esDeuda))) && tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'efectivo' && tarjetaSeleccionadaPendiente !== 'sin_asignar') {
         const tarjetaOrigen = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
         const saldoRestaurado = deudaEnReasignacion && deudaEnReasignacion.origenTarjetaId === tarjetaSeleccionadaPendiente
-            ? nuevoRegistro.monto
+            ? montoOperacion
             : 0;
         const saldoDisponible = tarjetaOrigen ? tarjetaOrigen.monto + saldoRestaurado : 0;
-        if (!tarjetaOrigen || saldoDisponible < nuevoRegistro.monto) {
-            const montoFaltante = Math.max(0, nuevoRegistro.monto - saldoDisponible);
-            detalleSaldoInsuficiente.textContent = `Necesitas $${nuevoRegistro.monto.toFixed(2)}, pero esta opción tiene $${saldoDisponible.toFixed(2)} disponibles. Faltan $${montoFaltante.toFixed(2)}.`;
+        if (!tarjetaOrigen || saldoDisponible < montoOperacion) {
+            const montoFaltante = Math.max(0, montoOperacion - saldoDisponible);
+            detalleSaldoInsuficiente.textContent = `Necesitas $${montoOperacion.toFixed(2)}, pero esta opción tiene $${saldoDisponible.toFixed(2)} disponibles. Faltan $${montoFaltante.toFixed(2)}.`;
             mensajeSaldoInsuficiente.hidden = false;
             return;
         }
@@ -1012,20 +1547,46 @@ async function confirmarGuardarCobro() {
     
     // Al reasignar una deuda se devuelve el pago anterior y se aplica el nuevo.
     if (esDeuda && deudaEnReasignacion) {
-        const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === deudaEnReasignacion.origenTarjetaId);
+        const pagosPorTarjeta = obtenerPagosPorTarjeta(nuevoRegistro);
         const tarjetaNueva = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
-        if (tarjetaAnterior && tarjetaAnterior.id !== (tarjetaNueva && tarjetaNueva.id)) {
-            tarjetaAnterior.monto += nuevoRegistro.monto;
+        const saldoDevueltoATarjetaNueva = tarjetaNueva ? pagosPorTarjeta[tarjetaNueva.id] || 0 : 0;
+        if (tarjetaNueva && tarjetaNueva.monto + saldoDevueltoATarjetaNueva < montoOperacion) {
+            detalleSaldoInsuficiente.textContent = `La tarjeta tiene $${(tarjetaNueva.monto + saldoDevueltoATarjetaNueva).toFixed(2)} disponibles y necesitas $${montoOperacion.toFixed(2)} para este pago.`;
+            mensajeSaldoInsuficiente.hidden = false;
+            return;
         }
-        if (tarjetaNueva && tarjetaNueva.id !== (tarjetaAnterior && tarjetaAnterior.id)) {
-            tarjetaNueva.monto -= nuevoRegistro.monto;
+        Object.entries(pagosPorTarjeta).forEach(([tarjetaId, monto]) => {
+            const tarjeta = tarjetas.find(item => item.id === tarjetaId);
+            if (tarjeta) tarjeta.monto += monto;
+        });
+        const metodoNombre = tarjetaSeleccionadaPendiente === 'efectivo'
+            ? 'Efectivo'
+            : tarjetas.find(item => item.id === tarjetaSeleccionadaPendiente)?.nombre || (tarjetaSeleccionadaPendiente === 'sin_asignar' ? 'Sin asignar' : 'Tarjeta');
+        if (tarjetaNueva) tarjetaNueva.monto -= montoOperacion;
+        nuevoRegistro.abonos = Array.isArray(nuevoRegistro.abonos) ? nuevoRegistro.abonos : [];
+        if (nuevoRegistro.abonos.length === 0 && montoOperacion > 0) {
+            nuevoRegistro.abonos.push({
+                id: Date.now().toString(),
+                monto: montoOperacion,
+                fechaHora: obtenerFechaHoraLocal(),
+                descripcion: 'Pago de deuda',
+                metodo: tarjetaSeleccionadaPendiente,
+                metodoNombre
+            });
+        } else {
+            nuevoRegistro.abonos = nuevoRegistro.abonos.map(abono => ({
+                ...abono,
+                metodo: tarjetaSeleccionadaPendiente,
+                metodoNombre
+            }));
         }
+        await guardarRegistroEnSupabase(nuevoRegistro);
         guardarTarjetas();
     // Cobros suman a la tarjeta; el dinero prestado y las deudas salen de la tarjeta.
-    } else if (tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'sin_asignar' && (esDineroPrestado || esDeuda)) {
+    } else if (tarjetaSeleccionadaPendiente && tarjetaSeleccionadaPendiente !== 'sin_asignar' && (esDineroPrestado || esDeuda || esAbonoDeuda)) {
         const tarjeta = tarjetas.find(t => t.id === tarjetaSeleccionadaPendiente);
         if (tarjeta) {
-            tarjeta.monto -= nuevoRegistro.monto;
+            tarjeta.monto -= montoOperacion;
             guardarTarjetas();
         }
     } else if (tarjetaSeleccionadaPendiente && !esDeuda) {
@@ -1080,10 +1641,23 @@ modalSeleccionarTarjeta.addEventListener('click', function(e) {
     }
 });
 
-// Mostrar/ocultar selector de tarjeta según el tipo
-tipoInput.addEventListener('change', function() {
-    grupoTarjeta.style.display = this.value === 'cobrado' ? 'block' : 'none';
-});
+// Ajustar los campos obligatorios según el tipo de movimiento.
+function actualizarCamposFormulario() {
+    const esRetiroEfectivo = tipoInput.value === 'retiro_efectivo';
+    limpiarAvisosSaldoRetiro();
+    grupoTipo.hidden = false;
+    grupoTarjeta.style.display = tipoInput.value === 'cobrado' ? 'block' : 'none';
+    grupoCliente.hidden = esRetiroEfectivo;
+    grupoCliente.style.display = esRetiroEfectivo ? 'none' : '';
+    grupoFecha.hidden = esRetiroEfectivo;
+    grupoFecha.style.display = esRetiroEfectivo ? 'none' : '';
+    clienteInput.required = !esRetiroEfectivo;
+    fechaHoraInput.required = !esRetiroEfectivo;
+    descripcionInput.required = esRetiroEfectivo;
+}
+
+tipoInput.addEventListener('change', actualizarCamposFormulario);
+actualizarCamposFormulario();
 
 // Funciones para Ganancias Semanales
 function abrirModalGanancia() {
@@ -1339,13 +1913,12 @@ function prepararRegistroDeuda() {
     window.scrollTo({ top: document.querySelector('.form-card').offsetTop, behavior: 'smooth' });
 }
 
-
 function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananciasSemanales) {
     if (!contenedor) return;
     
     contenedor.innerHTML = '';
     
-    const movimientosEnCalendario = registros.filter(registro => registro.enCalendario);
+    const movimientosEnCalendario = [...registros, ...retirosEfectivo].filter(registro => registro.enCalendario);
     const elementosCalendario = [...gananciasSemanales, ...movimientosEnCalendario]
         .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
@@ -1376,7 +1949,9 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
         const tarjetaDestino = ganancia.tarjetaDestinoId
             ? tarjetas.find(tarjeta => tarjeta.id === ganancia.tarjetaDestinoId)
             : null;
-        const destinoHtml = ganancia.tipo === 'deuda' && ganancia.origenEfectivo
+        const destinoHtml = ganancia.tipo === 'retiro_efectivo'
+            ? '<div class="ganancia-destino retiro-efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Salida de efectivo</strong></span></div>'
+            : ganancia.tipo === 'deuda' && ganancia.origenEfectivo
             ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Deuda pagada en efectivo</strong></span></div>'
             : ganancia.tipo === 'deuda' && ganancia.origenTarjetaId
             ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Deuda pagada con: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
@@ -1387,16 +1962,18 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
             : ganancia.tipo === 'prestado' && ganancia.origenTarjetaId
             ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Prestado desde: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
             : ganancia.tipo === 'recibido' && ganancia.origenEfectivo
-            ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Retirado en efectivo</strong></span></div>'
+            ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Recibido en efectivo</strong></span></div>'
             : ganancia.tipo === 'recibido' && ganancia.origenTarjetaId
-            ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Retirado de: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
+            ? `<div class="ganancia-destino"><i class="fa-solid fa-credit-card"></i><span>Recibido en: <strong>${tarjetas.find(tarjeta => tarjeta.id === ganancia.origenTarjetaId)?.nombre || ganancia.origenTarjetaNombre || 'Tarjeta'}</strong></span></div>`
             : ganancia.destinoEfectivo
             ? '<div class="ganancia-destino efectivo"><i class="fa-solid fa-money-bill-wave"></i><span><strong>Cobrado en efectivo</strong></span></div>'
             : ganancia.tarjetaDestinoId || ganancia.tarjetaDestinoNombre
             ? `<div class="ganancia-destino"><i class="fa-solid fa-wallet"></i><span>Enviado a: <strong>${tarjetaDestino ? tarjetaDestino.nombre : (ganancia.tarjetaDestinoNombre || 'Tarjeta registrada')}</strong></span></div>`
             : '<div class="ganancia-destino sin-destino"><i class="fa-solid fa-clock"></i><span>Sin tarjeta de destino</span></div>';
         const estadoClase = estado === 'pagado' ? 'pagado' : 'pendiente';
-        const estadoTexto = esMovimiento
+        const estadoTexto = ganancia.tipo === 'retiro_efectivo'
+            ? '↘ Retiro registrado'
+            : esMovimiento
             ? (ganancia.tipo === 'deuda' ? (estado === 'pagado' ? '✅ Deuda pagada' : '⏳ Deuda pendiente') : ganancia.tipo === 'prestado' ? (estado === 'pagado' ? '✅ Pagado' : '⏳ Deuda pendiente') : `📌 ${ganancia.tipo === 'cobrado' ? 'Cobro realizado' : 'Movimiento registrado'}`)
             : (estado === 'pagado' ? '✅ Pagado' : '⏳ Pendiente');
         const descripcionesPorDia = ganancia.descripcionesPorDia || {};
@@ -1446,7 +2023,7 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
                     <i class="fa-solid fa-trash"></i> Eliminar
                 </button>
                 ` : ''}
-                ${ganancia.tipo !== 'deuda' ? `<button class="btn-accion btn-destino" onclick="abrirEditarDestinoCalendario('${ganancia.id}', ${esMovimiento})">
+                ${ganancia.tipo !== 'deuda' && ganancia.tipo !== 'retiro_efectivo' ? `<button class="btn-accion btn-destino" onclick="abrirEditarDestinoCalendario('${ganancia.id}', ${esMovimiento})">
                     <i class="fa-solid fa-wallet"></i> ${ganancia.tarjetaDestinoId || ganancia.destinoEfectivo ? 'Cambiar destino' : 'Asignar tarjeta'}
                 </button>` : ''}
                 ${ganancia.tipo === 'deuda' && estado !== 'pagado' ? `
@@ -1477,7 +2054,7 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
 
 window.abrirEditarDestinoCalendario = function(id, esMovimiento) {
     const elemento = esMovimiento
-        ? registros.find(registro => registro.id === id)
+        ? [...registros, ...retirosEfectivo].find(registro => registro.id === id)
         : gananciasSemanales.find(ganancia => ganancia.id === id);
     if (!elemento) return;
 
@@ -1487,17 +2064,17 @@ window.abrirEditarDestinoCalendario = function(id, esMovimiento) {
     inputMontoCalendario.value = Number(elemento.monto).toFixed(2);
     const esDineroRecibido = elemento.tipo === 'recibido';
     selectDestinoCalendario.innerHTML = esDineroRecibido
-        ? '<option value="">Sin origen seleccionado</option><option value="efectivo">Recibido en efectivo</option>'
+        ? '<option value="">Sin destino seleccionado</option><option value="efectivo">Mandado a efectivo</option>'
         : '<option value="">Sin tarjeta de destino</option><option value="efectivo">Cobrado en efectivo</option>';
     tarjetas.forEach(tarjeta => {
         const option = document.createElement('option');
         option.value = tarjeta.id;
         option.textContent = `${tarjeta.nombre} ($${tarjeta.monto.toFixed(2)})`;
-        option.selected = tarjeta.id === (esDineroRecibido ? elemento.origenTarjetaId : elemento.tarjetaDestinoId);
+        option.selected = tarjeta.id === elemento.tarjetaDestinoId;
         selectDestinoCalendario.appendChild(option);
     });
     selectDestinoCalendario.value = esDineroRecibido
-        ? (elemento.origenEfectivo ? 'efectivo' : (elemento.origenTarjetaId || ''))
+        ? (elemento.destinoEfectivo ? 'efectivo' : (elemento.tarjetaDestinoId || ''))
         : (elemento.destinoEfectivo ? 'efectivo' : (elemento.tarjetaDestinoId || ''));
     modalEditarDestinoCalendario.style.display = 'flex';
     inputMontoCalendario.focus();
@@ -1520,7 +2097,7 @@ window.guardarCorreccionCalendario = async function() {
 
     const esDineroRecibido = elementoCalendarioEnEdicion.tipo === 'recibido';
     const esDineroPrestado = elementoCalendarioEnEdicion.tipo === 'prestado';
-    const usaOrigenTarjeta = esDineroRecibido || esDineroPrestado;
+    const usaOrigenTarjeta = esDineroPrestado;
     const campoTarjeta = usaOrigenTarjeta ? 'origenTarjetaId' : 'tarjetaDestinoId';
     const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === elementoCalendarioEnEdicion[campoTarjeta]);
     const tarjetaNueva = tarjetas.find(tarjeta => tarjeta.id === selectDestinoCalendario.value);
@@ -1592,7 +2169,6 @@ window.eliminarGananciaSemanal = async function(id) {
 }
 
 btnAgregarGananciaSemanal.addEventListener('click', abrirModalGanancia);
-btnAgregarDeudaCalendario.addEventListener('click', prepararRegistroDeuda);
 
 btnVerHistorialRetiros.addEventListener('click', abrirHistorialRetiros);
 btnCerrarHistorialRetiros.addEventListener('click', cerrarHistorialRetiros);
@@ -1668,6 +2244,17 @@ form.addEventListener('submit', async function(e) {
         origenEfectivo: registroOriginal ? Boolean(registroOriginal.origenEfectivo) : false
     };
 
+    if (tipo === 'retiro_efectivo' && !id) {
+        limpiarAvisosSaldoRetiro();
+        const saldoDisponible = calcularEfectivoDisponible();
+        if (!Number.isFinite(monto) || monto <= 0 || monto > saldoDisponible) {
+            mostrarSaldoInsuficienteEnFormulario(monto, saldoDisponible);
+            return;
+        }
+        abrirConfirmacionRetiroEfectivo(monto, descripcion, fechaHora);
+        return;
+    }
+
     // Los cobros eligen destino al registrarse; el préstamo elige origen al pagarse.
     if (tipo === 'cobrado' && !id) {
         registroPendienteDeGuardar = nuevoRegistro;
@@ -1675,7 +2262,7 @@ form.addEventListener('submit', async function(e) {
         return;
     }
 
-    if ((tipo === 'prestado' || tipo === 'deuda') && !id) {
+    if ((tipo === 'prestado' || tipo === 'deuda' || tipo === 'recibido') && !id) {
         nuevoRegistro.estado = 'pendiente';
     }
 
@@ -1706,6 +2293,7 @@ form.addEventListener('submit', async function(e) {
 async function guardarYActualizar() {
     localStorage.setItem('registros_cobros', JSON.stringify(registros));
     localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
+    localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
     actualizarInterfaz();
 }
 
@@ -1732,18 +2320,21 @@ function detallesParaSupabase(item) {
     const origenTarjeta = item.origenTarjetaId ? ` [origenTarjeta:${encodeURIComponent(item.origenTarjetaId)}]` : '';
     const origenNombre = item.origenTarjetaNombre ? ` [origenNombre:${encodeURIComponent(item.origenTarjetaNombre)}]` : '';
     const origenEfectivo = item.origenEfectivo ? ' [origenEfectivo:si]' : '';
-    const estadoRegistro = item.tipo === 'prestado' || item.tipo === 'deuda' ? ` [estadoRegistro:${item.estado || 'pendiente'}]` : '';
-    return `${item.descripcion}${calendario}${tarjetaDestino}${tarjetaNombre}${efectivo}${origenTarjeta}${origenNombre}${origenEfectivo}${estadoRegistro} ${PREFIJO_TIPO}${item.tipo}]`;
+    const abonos = Array.isArray(item.abonos) && item.abonos.length > 0
+        ? ` [abonos:${encodeURIComponent(JSON.stringify(item.abonos))}]`
+        : '';
+    const estadoRegistro = item.tipo === 'prestado' || item.tipo === 'deuda' || item.tipo === 'recibido' ? ` [estadoRegistro:${item.estado || 'pendiente'}]` : '';
+    return `${item.descripcion}${calendario}${tarjetaDestino}${tarjetaNombre}${efectivo}${origenTarjeta}${origenNombre}${origenEfectivo}${abonos}${estadoRegistro} ${PREFIJO_TIPO}${item.tipo}]`;
 }
 
 function registroDesdeSupabase(item) {
     const detalles = item.detalles || 'Sin detalle';
-    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal)\]$/);
+    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo)\]$/);
     const tipo = tipoEncontrado ? tipoEncontrado[1] : 'cobrado';
     
-    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal)\]$/, '').trim();
+    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo)\]$/, '').trim();
     let dias = [];
-    let estado = tipo === 'prestado' || tipo === 'deuda' ? 'pendiente' : 'pagado';
+    let estado = tipo === 'prestado' || tipo === 'deuda' || tipo === 'recibido' ? 'pendiente' : 'pagado';
     const estadoRegistroMatch = detalles.match(/\[estadoRegistro:(pagado|pendiente)\]/);
     if (estadoRegistroMatch) estado = estadoRegistroMatch[1];
     descripcion = descripcion.replace(/\s*\[estadoRegistro:(pagado|pendiente)\]/, '').trim();
@@ -1752,6 +2343,7 @@ function registroDesdeSupabase(item) {
     let tarjetaDestinoNombre = '';
     let origenTarjetaId = null;
     let origenTarjetaNombre = '';
+    let abonos = [];
     const origenEfectivo = /\[origenEfectivo:si\]/.test(descripcion);
     descripcion = descripcion.replace(/\s*\[origenEfectivo:si\]/, '').trim();
     const destinoEfectivo = /\[efectivo:si\]/.test(descripcion);
@@ -1778,6 +2370,15 @@ function registroDesdeSupabase(item) {
     if (origenNombreMatch) {
         origenTarjetaNombre = decodeURIComponent(origenNombreMatch[1]);
         descripcion = descripcion.replace(/\s*\[origenNombre:[^\]]+\]/, '').trim();
+    }
+    const abonosMatch = descripcion.match(/\[abonos:([^\]]+)\]/);
+    if (abonosMatch) {
+        try {
+            abonos = JSON.parse(decodeURIComponent(abonosMatch[1]));
+        } catch (error) {
+            abonos = [];
+        }
+        descripcion = descripcion.replace(/\s*\[abonos:[^\]]+\]/, '').trim();
     }
 
     if (tipo === 'ganancia_semanal') {
@@ -1810,7 +2411,7 @@ function registroDesdeSupabase(item) {
         descripcion: descripcion || 'Sin detalle',
         fechaHora: `${item.fecha}T${String(item.hora || '00:00').slice(0, 5)}`,
         dias: dias,
-        estado: tipo === 'pendiente' ? 'pendiente' : tipo === 'cobrado' ? 'pagado' : estado,
+        estado: tipo === 'pendiente' || tipo === 'recibido' ? estado === 'pagado' ? 'pagado' : 'pendiente' : tipo === 'cobrado' ? 'pagado' : estado,
         descripcionesPorDia: descripcionesPorDia,
         tarjetaDestinoId: tarjetaDestinoId,
         tarjetaDestinoNombre: tarjetaDestinoNombre,
@@ -1818,7 +2419,8 @@ function registroDesdeSupabase(item) {
         destinoEfectivo: destinoEfectivo,
         origenTarjetaId: origenTarjetaId,
         origenTarjetaNombre: origenTarjetaNombre,
-        origenEfectivo: origenEfectivo
+        origenEfectivo: origenEfectivo,
+        abonos: Array.isArray(abonos) ? abonos : []
     };
 }
 
@@ -1856,6 +2458,7 @@ function preferenciasVisibilidadDesdeSupabase(item) {
             id: String(item.id),
             totalGeneralOculto: Boolean(datos.totalGeneralOculto),
             totalTarjetasOculto: Boolean(datos.totalTarjetasOculto),
+            efectivoOculto: Boolean(datos.efectivoOculto),
             contrasena: typeof datos.contrasena === 'string' && datos.contrasena ? datos.contrasena : null
         };
     } catch (error) {
@@ -1865,7 +2468,7 @@ function preferenciasVisibilidadDesdeSupabase(item) {
 
 async function guardarPreferenciasVisibilidad() {
     const datos = {
-        nombre: JSON.stringify({ totalGeneralOculto, totalTarjetasOculto, contrasena: contrasenaActual }),
+        nombre: JSON.stringify({ totalGeneralOculto, totalTarjetasOculto, efectivoOculto, contrasena: contrasenaActual }),
         fecha: new Date().toISOString().slice(0, 10),
         hora: new Date().toTimeString().slice(0, 5),
         monto: 0,
@@ -1895,12 +2498,14 @@ async function cargarPreferenciasVisibilidad(data) {
     idPreferenciasVisibilidad = valores.id;
     totalGeneralOculto = valores.totalGeneralOculto;
     totalTarjetasOculto = valores.totalTarjetasOculto;
+    efectivoOculto = valores.efectivoOculto;
     if (valores.contrasena) {
         contrasenaActual = valores.contrasena;
         localStorage.setItem('contrasena_cobros', contrasenaActual);
     }
     localStorage.setItem(CLAVE_TOTAL_GENERAL_OCULTO, String(totalGeneralOculto));
     localStorage.setItem(CLAVE_TOTAL_TARJETAS_OCULTO, String(totalTarjetasOculto));
+    localStorage.setItem(CLAVE_EFECTIVO_OCULTO, String(efectivoOculto));
 }
 
 function claveTarjeta(tarjeta) {
@@ -1957,11 +2562,13 @@ async function cargarRegistrosDesdeSupabase() {
     tarjetas = tarjetasNube;
     
     // Separar ganancias semanales de los registros normales
-    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
+    retirosEfectivo = todosLosRegistros.filter(r => r.tipo === 'retiro_efectivo');
+    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo');
     gananciasSemanales = todosLosRegistros.filter(r => r.tipo === 'ganancia_semanal');
     
     localStorage.setItem('registros_cobros', JSON.stringify(registros));
     localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
+    localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
     actualizarInterfaz();
 }
 
@@ -1993,11 +2600,13 @@ async function cargarDatosDesdeSupabase() {
             const todosLosRegistros = data.filter(item => !esTarjetaSupabase(item) && !esPreferenciaVisibilidadSupabase(item)).map(registroDesdeSupabase);
 
       // Separar ganancias semanales de los registros normales
-      registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal');
+    retirosEfectivo = todosLosRegistros.filter(r => r.tipo === 'retiro_efectivo');
+    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo');
       gananciasSemanales = todosLosRegistros.filter(r => r.tipo === 'ganancia_semanal');
 
       localStorage.setItem('registros_cobros', JSON.stringify(registros));
       localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
+    localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
 
       // Actualizar la interfaz de usuario con los datos de la nube
       if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
@@ -2039,6 +2648,7 @@ async function guardarRegistroEnSupabase(item) {
 
 function resetFormulario() {
     form.reset();
+    actualizarCamposFormulario();
     registroIdInput.value = '';
     document.getElementById('form-title').innerHTML = '<i class="fa-solid fa-circle-plus"></i> Registrar Nuevo Movimiento';
     btnGuardar.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar Registro';
@@ -2050,6 +2660,7 @@ btnCancelar.addEventListener('click', resetFormulario);
 
 function actualizarInterfaz() {
     renderTarjetas();
+    renderResumenHistorialEfectivo();
     renderTablas();
     renderGananciasSemanales();
     calcularTotales();
@@ -2060,6 +2671,7 @@ function renderTablas() {
     const tablaCobrados = document.getElementById('tabla-cobrados');
     const tablaPrestado = document.getElementById('tabla-prestado');
     const tablaRecibido = document.getElementById('tabla-recibido');
+    const tablaRecibidoPagado = document.getElementById('tabla-recibido-pagado');
     const tablaDeudasPendientes = document.getElementById('tabla-deudas-pendientes');
     const tablaDeudasPagadas = document.getElementById('tabla-deudas-pagadas');
 
@@ -2067,6 +2679,7 @@ function renderTablas() {
     tablaCobrados.innerHTML = '';
     tablaPrestado.innerHTML = '';
     tablaRecibido.innerHTML = '';
+    tablaRecibidoPagado.innerHTML = '';
     tablaDeudasPendientes.innerHTML = '';
     tablaDeudasPagadas.innerHTML = '';
 
@@ -2080,6 +2693,7 @@ function renderTablas() {
     ];
     const prestado = registros.filter(r => r.tipo === 'prestado');
     const recibido = registros.filter(r => r.tipo === 'recibido');
+    const recibidoPagado = registros.filter(r => r.tipo === 'recibido' && r.estado === 'pagado');
     const deudasPendientes = registros.filter(r => r.tipo === 'deuda' && r.estado !== 'pagado');
     const deudasPagadas = registros.filter(r => r.tipo === 'deuda' && r.estado === 'pagado');
 
@@ -2087,6 +2701,7 @@ function renderTablas() {
     renderTabla(tablaCobrados, cobrados, 'No hay cobros realizados registrados.');
     renderTabla(tablaPrestado, prestado, 'No hay dinero prestado registrado.');
     renderTabla(tablaRecibido, recibido, 'No hay dinero recibido en préstamo registrado.');
+    renderTabla(tablaRecibidoPagado, recibidoPagado, 'No hay deudas recibidas pagadas.');
     renderTabla(tablaDeudasPendientes, deudasPendientes, 'No hay deudas pendientes registradas.');
     renderTabla(tablaDeudasPagadas, deudasPagadas, 'No hay deudas pagadas registradas.');
 }
@@ -2140,6 +2755,12 @@ const datosHistorialSecciones = {
         mensaje: 'No hay dinero recibido en préstamo registrado.',
         obtener: () => registros.filter(r => r.tipo === 'recibido')
     }
+    ,
+    'recibido-pagado': {
+        titulo: 'Deudas recibidas pagadas',
+        mensaje: 'No hay deudas recibidas pagadas.',
+        obtener: () => registros.filter(r => r.tipo === 'recibido' && r.estado === 'pagado')
+    }
 };
 
 function abrirHistorialRegistros(seccion) {
@@ -2178,7 +2799,10 @@ function crearFila(item) {
     const esGananciaSemanal = item.tipo === 'ganancia_semanal';
     const esPendiente = item.tipo === 'pendiente' || (esGananciaSemanal && item.estado === 'pendiente');
     const esPrestamoPendiente = item.tipo === 'prestado' && item.estado !== 'pagado';
+    const esRecibidoPendiente = item.tipo === 'recibido' && item.estado !== 'pagado';
     const esDeudaPendiente = item.tipo === 'deuda' && item.estado !== 'pagado';
+    const totalAbonado = item.tipo === 'deuda' ? obtenerTotalAbonado(item) : 0;
+    const saldoDeuda = item.tipo === 'deuda' ? obtenerSaldoDeuda(item) : 0;
     const colorMonto = esPendiente || esDeudaPendiente ? '#ef4444' : item.tipo === 'prestado' ? '#f59e0b' : '#10b981';
     const textoDestino = item.tipo === 'recibido' || item.tipo === 'prestado'
         ? (item.origenTarjetaId || item.origenEfectivo ? 'Cambiar origen' : 'Retirar de tarjeta')
@@ -2189,17 +2813,26 @@ function crearFila(item) {
     const estadoDeuda = item.tipo === 'deuda'
         ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagada' : '⏳ Pendiente'}</span>`
         : '';
+    const resumenDeuda = item.tipo === 'deuda'
+        ? `<div class="resumen-deuda"><span>Total: $${Number(item.monto).toFixed(2)}</span><span>Abonado: $${totalAbonado.toFixed(2)}</span><span>Falta: $${saldoDeuda.toFixed(2)}</span></div>`
+        : '';
+    const estadoRecibido = item.tipo === 'recibido'
+        ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagada' : '⏳ Deuda pendiente'}</span>`
+        : '';
 
     tr.innerHTML = `
     <td><strong>${item.cliente}</strong></td>
     <td style="color: ${colorMonto}; font-weight: 700;">$${item.monto.toFixed(2)}</td>
-    <td>${item.descripcion}${estadoPrestamo}${estadoDeuda}</td>
+    <td>${item.descripcion}${estadoPrestamo}${estadoDeuda}${estadoRecibido}${resumenDeuda}</td>
     <td>${fechaFormateada}</td>
     <td>
       <div class="action-buttons">
                 ${esPendiente ? `<button class="btn btn-pay" onclick="${esGananciaSemanal ? `marcarGananciaComoPagada('${item.id}')` : `marcarComoCobrado('${item.id}')`}" title="Marcar como pagado"><i class="fa-solid fa-check"></i> Cobrar</button>` : ''}
                 ${esPrestamoPendiente ? `<button class="btn btn-pay" onclick="marcarPrestamoComoPagado('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-check"></i> Pagar deuda</button>` : ''}
+                ${esRecibidoPendiente ? `<button class="btn btn-pay" onclick="marcarRecibidoComoPagado('${item.id}')" title="Cobrar deuda"><i class="fa-solid fa-check"></i> Cobrar deuda</button>` : ''}
+                ${item.tipo === 'recibido' && item.estado === 'pagado' ? '<span class="estado-prestamo pagado">✅ Pagada</span>' : ''}
                 ${esDeudaPendiente ? `<button class="btn btn-pay" onclick="marcarDeudaComoPagada('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-file-invoice-dollar"></i> Pagar deuda</button>` : ''}
+                ${esDeudaPendiente ? `<button class="btn btn-destino" onclick="abrirModalAbonoDeuda('${item.id}')" title="Abonar una parte"><i class="fa-solid fa-coins"></i> Abonar</button>` : ''}
                 ${item.tipo === 'deuda' && item.estado === 'pagado' ? `<button class="btn btn-destino" onclick="cambiarPagoDeuda('${item.id}')" title="Cambiar método de pago"><i class="fa-solid fa-arrows-rotate"></i> Cambiar pago</button>` : ''}
             <button class="btn btn-edit" onclick="editarRegistroEnTabla('${item.id}', this)" title="Editar registro aquí"><i class="fa-solid fa-pen"></i></button>
         ${item.tipo !== 'deuda' ? `<button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', ${!esGananciaSemanal})" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>` : ''}
@@ -2211,7 +2844,7 @@ function crearFila(item) {
 }
 
 window.editarRegistroEnTabla = function(id, boton) {
-    const item = [...registros, ...gananciasSemanales].find(registro => registro.id === id);
+    const item = [...registros, ...gananciasSemanales, ...retirosEfectivo].find(registro => registro.id === id);
     if (!item) return;
 
     const filaActual = boton.closest('tr');
@@ -2318,6 +2951,11 @@ function cargarParaEditar(id) {
 }
 
 function eliminarRegistro(id) {
+    const retiroEfectivo = retirosEfectivo.find(retiro => retiro.id === id);
+    if (retiroEfectivo) {
+        eliminarRetiroEfectivo(id);
+        return;
+    }
     registroPendienteDeEliminar = id;
     tarjetaPendienteDeEliminar = null;
     retiroPendienteDeEliminar = null;
@@ -2349,6 +2987,16 @@ async function confirmarEliminacion() {
     }
 
     if (retiroPendienteDeEliminar) {
+        if (retiroPendienteDeEliminar.efectivo) {
+            const id = retiroPendienteDeEliminar.retiro.id;
+            retirosEfectivo = retirosEfectivo.filter(retiro => retiro.id !== id);
+            localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+            guardarYActualizar();
+            await eliminarRegistroDeSupabase(id);
+            cerrarModalEliminar();
+            if (!modalRetiroEfectivo.hidden) abrirModalRetiroEfectivo();
+            return;
+        }
         const { tarjeta, retiro } = retiroPendienteDeEliminar;
         tarjeta.monto += retiro.monto;
         tarjeta.retiros = tarjeta.retiros.filter(item => item.id !== retiro.id);
@@ -2480,6 +3128,7 @@ function calcularTotales() {
     document.getElementById('total-prestado').innerText = `$${totalPrestado.toFixed(2)}`;
     document.getElementById('total-recibido').innerText = `$${totalRecibido.toFixed(2)}`;
     montoTotalGeneralElement.innerText = totalGeneralOculto ? '••••••' : `$${totalMontoGeneral.toFixed(2)}`;
+    actualizarMontoEfectivo();
 }
 
 window.editarGananciaSemanal = function(id) {
@@ -2535,6 +3184,15 @@ window.marcarPrestamoComoPagado = function(id) {
     mostrarModalSeleccionarTarjeta();
 }
 
+window.marcarRecibidoComoPagado = async function(id) {
+    const recibido = registros.find(registro => registro.id === id && registro.tipo === 'recibido');
+    if (!recibido || recibido.estado === 'pagado') return;
+
+    modoCobrarRecibido = true;
+    registroPendienteDeGuardar = recibido;
+    mostrarModalSeleccionarTarjeta();
+}
+
 window.marcarDeudaComoPagada = function(id) {
     const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
     if (!deuda || deuda.estado === 'pagado') return;
@@ -2552,7 +3210,8 @@ window.cambiarPagoDeuda = function(id) {
 
     deudaEnReasignacion = {
         origenTarjetaId: deuda.origenTarjetaId || null,
-        origenEfectivo: Boolean(deuda.origenEfectivo)
+        origenEfectivo: Boolean(deuda.origenEfectivo),
+        montoPagado: obtenerTotalAbonado(deuda) || Number(deuda.monto) || 0
     };
     registroPendienteDeGuardar = deuda;
     mostrarModalSeleccionarTarjeta();
