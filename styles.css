@@ -1182,6 +1182,19 @@ select:focus {
     display: none;
 }
 
+#modal-seleccionar-tarjeta-cobro {
+    z-index: 40;
+}
+
+#modal-abono-deuda {
+    z-index: 20;
+}
+
+#modal-seleccionar-tarjeta-cobro .modal-content {
+    position: relative;
+    z-index: 41;
+}
+
 .modal-card {
     position: relative;
     width: min(100%, 420px);
@@ -2328,4 +2341,517 @@ th {
 .lista-abonos-completa {
     max-height: min(65vh, 560px);
     overflow-y: auto;
+}
+
+.card-history-section {
+    border-color: #bfdbfe;
+    background: linear-gradient(135deg, #f5f9ff 0%, #ffffff 100%);
+    box-shadow: 0 4px 12px rgba(30, 64, 175, 0.06);
+}
+
+.card-section-kicker {
+    color: #1d4ed8;
+}
+
+.cash-history-header h2 i {
+    color: #b7791f;
+}
+
+.card-history-section .cash-history-header h2 i {
+    color: #2563eb;
+}
+
+.card-history-empty {
+    border-color: #bfdbfe;
+    background: rgba(239, 246, 255, 0.7);
+}
+
+.card-history-empty i,
+.card-history-empty strong {
+    color: #1d4ed8;
+}
+
+.gastos-history-section {
+    border-color: #c4b5fd;
+    background: linear-gradient(135deg, #faf5ff 0%, #ffffff 100%);
+    box-shadow: 0 4px 12px rgba(109, 40, 217, 0.06);
+}
+
+.gastos-section-kicker,
+.gastos-history-empty i,
+.gastos-history-empty strong {
+    color: #7c3aed;
+}
+
+.gastos-history-empty {
+    border-color: #ddd6fe;
+    background: rgba(245, 243, 255, 0.7);
+}
+
+.gasto-editor-inline {
+    display: grid;
+    grid-template-columns: minmax(150px, 1.3fr) minmax(110px, .7fr) minmax(175px, 1fr) minmax(150px, 1fr) auto;
+    gap: 10px;
+    align-items: end;
+    margin-top: -2px;
+    padding: 12px;
+    border: 1px solid #c4b5fd;
+    border-radius: 8px;
+    background: #faf5ff;
+}
+
+.gasto-editor-inline .editor-registro-campo {
+    display: grid;
+    gap: 5px;
+}
+
+.gasto-editor-inline label {
+    color: #5b21b6;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.gasto-editor-inline input,
+.gasto-editor-inline select {
+    width: 100%;
+    padding: 8px 9px;
+    font-size: .84rem;
+}
+
+.gasto-editor-inline .editor-registro-acciones {
+    display: flex;
+    gap: 6px;
+}
+
+@media (max-width: 760px) {
+    .gasto-editor-inline {
+        grid-template-columns: 1fr 1fr;
+    }
+    .gasto-editor-inline .editor-registro-acciones {
+        grid-column: 1 / -1;
+    }
+}
+
+.otros-movimientos-lista {
+    display: grid;
+    gap: 18px;
+    max-height: min(70vh, 650px);
+    overflow-y: auto;
+}
+
+.otros-movimientos-grupo {
+    padding: 14px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.otros-movimientos-encabezado {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.otros-movimientos-grupo h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0;
+    color: var(--primary-color);
+    font-size: .98rem;
+}
+
+.otros-movimientos-grupo h3 i {
+    color: var(--blue);
+}
+
+.otros-movimientos-items {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.otro-movimiento-item {
+    display: grid;
+    gap: 3px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: #f8fafc;
+    min-height: 92px;
+    align-content: space-between;
+}
+
+.otro-movimiento-item>div:first-child {
+    display: grid;
+    gap: 3px;
+}
+
+.otro-movimiento-acciones {
+    display: flex;
+    justify-content: flex-end;
+    gap: 5px;
+}
+
+.otro-movimiento-item strong {
+    color: var(--primary-color);
+    font-size: .86rem;
+}
+
+.otro-movimiento-item span,
+.otro-movimiento-item small {
+    color: #64748b;
+    font-size: .76rem;
+}
+
+.historial-grupo-card {
+    width: min(96vw, 980px);
+}
+
+.historial-grupo-lista {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    max-height: min(70vh, 620px);
+    overflow-y: auto;
+    padding: 4px;
+}
+
+.historial-grupo-lista .otro-movimiento-item,
+.historial-grupo-lista .retiro-item,
+.historial-grupo-lista .cash-history-item {
+    min-height: 105px;
+}
+
+.calendario-registros-card {
+    width: min(96vw, 760px);
+    border-color: #bfdbfe;
+    background: linear-gradient(145deg, #ffffff, #f8fbff);
+}
+
+.calendario-modal-titulo p {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: .82rem;
+}
+
+.calendario-controles {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.calendario-controles strong {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    text-transform: capitalize;
+}
+
+.calendario-registros-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 6px;
+    padding: 12px;
+    border: 1px solid #dbeafe;
+    border-radius: 12px;
+    background: #eff6ff;
+}
+
+.calendario-dia-semana {
+    padding: 5px 2px;
+    color: #1d4ed8;
+    font-size: .72rem;
+    font-weight: 800;
+    text-align: center;
+}
+
+.calendario-dia {
+    position: relative;
+    min-height: 52px;
+    border: 1px solid #dbeafe;
+    border-radius: 9px;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    font-size: .88rem;
+}
+
+button.calendario-dia:hover,
+button.calendario-dia:focus-visible {
+    border-color: #60a5fa;
+    background: #dbeafe;
+    outline: none;
+}
+
+.calendario-dia-vacio {
+    border-color: transparent;
+    background: transparent;
+}
+
+.calendario-dia.con-registro {
+    border-color: #93c5fd;
+    background: #ffffff;
+    font-weight: 800;
+}
+
+.calendario-punto {
+    position: absolute;
+    bottom: 7px;
+    left: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #2563eb;
+    transform: translateX(-50%);
+}
+
+.detalle-dia-registros {
+    margin-top: 16px;
+    padding: 14px;
+    border: 1px solid #dbeafe;
+    border-radius: 10px;
+    background: #ffffff;
+}
+
+.detalle-dia-registros h3 {
+    color: var(--primary-color);
+    font-size: .95rem;
+    text-transform: capitalize;
+}
+
+.detalle-dia-registros h3 i {
+    margin-right: 6px;
+    color: #2563eb;
+}
+
+.detalle-dia-lista {
+    display: grid;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.detalle-dia-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 11px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+.detalle-dia-item div {
+    display: grid;
+    gap: 3px;
+}
+
+.detalle-dia-item strong {
+    color: var(--primary-color);
+    font-size: .82rem;
+}
+
+.detalle-dia-item span,
+.dia-sin-registros {
+    color: #64748b;
+    font-size: .76rem;
+}
+
+.detalle-dia-item b {
+    color: #047857;
+    white-space: nowrap;
+}
+
+.detalle-dia-monto {
+    display: grid;
+    justify-items: end;
+    gap: 3px;
+    margin-left: auto;
+}
+
+.detalle-dia-monto small {
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: .65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.registro-original {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.registro-modificado {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.estado-edicion {
+    display: inline-block;
+    margin-left: 5px;
+    vertical-align: middle;
+}
+
+.detalle-dia-acciones {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+}
+
+.btn-calendario-editar,
+.btn-calendario-eliminar {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+}
+
+.btn-calendario-editar {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.btn-calendario-eliminar {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.btn-calendario-editar:hover,
+.btn-calendario-editar:focus-visible {
+    background: #bfdbfe;
+}
+
+.btn-calendario-eliminar:hover,
+.btn-calendario-eliminar:focus-visible {
+    background: #fecaca;
+}
+
+@media (max-width: 600px) {
+    .calendario-registros-grid {
+        gap: 3px;
+        padding: 7px;
+    }
+    .calendario-dia {
+        min-height: 42px;
+        font-size: .78rem;
+    }
+    .detalle-dia-item {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .detalle-dia-acciones {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
+
+@media (max-width: 760px) {
+    .otros-movimientos-items,
+    .historial-grupo-lista {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 760px) {
+    .otros-movimientos-items {
+        grid-template-columns: 1fr;
+    }
+}
+
+#modal-seguridad-calendario {
+    z-index: 50;
+}
+
+#modal-editar-calendario-visual {
+    z-index: 45;
+}
+
+.seguridad-calendario-card {
+    width: min(100%, 420px);
+    border-color: #bfdbfe;
+    text-align: center;
+    background: linear-gradient(145deg, #ffffff, #eff6ff);
+}
+
+.seguridad-calendario-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 0 auto 12px;
+    border-radius: 16px;
+    background: #dbeafe;
+    color: #2563eb;
+    font-size: 1.45rem;
+}
+
+.seguridad-calendario-kicker {
+    color: #2563eb;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.seguridad-calendario-card h2 {
+    margin-top: 5px;
+    color: var(--primary-color);
+    font-size: 1.3rem;
+}
+
+.seguridad-calendario-card>p {
+    margin: 8px 0 18px;
+    color: #64748b;
+    font-size: .86rem;
+}
+
+.seguridad-calendario-card form {
+    text-align: left;
+}
+
+.seguridad-calendario-card form label {
+    display: block;
+    margin-bottom: 6px;
+    color: #475569;
+    font-size: .8rem;
+    font-weight: 700;
+}
+
+.seguridad-calendario-card form input {
+    width: 100%;
+}
+
+.seguridad-calendario-card .modal-actions {
+    margin-top: 14px;
+}
+
+.calendario-edicion-visual-card {
+    width: min(100%, 520px);
+}
+
+.resumen-titulo-dia {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cuenta-regresiva-dia {
+    display: inline-block;
+    padding: 2px 5px;
+    border: 1px solid #bbf7d0;
+    border-radius: 5px;
+    background: #f0fdf4;
+    color: #15803d;
+    font-size: .64rem;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    letter-spacing: .02em;
+    white-space: nowrap;
 }

@@ -8,6 +8,7 @@ let registros = JSON.parse(localStorage.getItem('registros_cobros')) || [];
 let tarjetas = JSON.parse(localStorage.getItem('tarjetas_bancarias')) || [];
 let gananciasSemanales = JSON.parse(localStorage.getItem('ganancias_semanales')) || [];
 let retirosEfectivo = JSON.parse(localStorage.getItem('retiros_efectivo')) || [];
+let gastosMios = JSON.parse(localStorage.getItem('gastos_mios')) || [];
 
 const form = document.getElementById('registro-form');
 const mensajeSaldoRetiroForm = document.getElementById('mensaje-saldo-retiro-form');
@@ -53,13 +54,29 @@ const montoTotalTarjetas = document.getElementById('monto-total-tarjetas');
 const montoTotalTarjetasResumen = document.getElementById('monto-total-tarjetas-resumen');
 const montoTotalGeneralElement = document.getElementById('monto-total-general');
 const montoEfectivoElement = document.getElementById('monto-efectivo');
+const cuentaRegresivaDia = document.getElementById('cuenta-regresiva-dia');
+const cuentaRegresivaSemana = document.getElementById('cuenta-regresiva-semana');
+const cuentaRegresivaMes = document.getElementById('cuenta-regresiva-mes');
 const resumenHistorialEfectivo = document.getElementById('resumen-historial-efectivo');
 const btnToggleTotales = document.getElementById('btn-toggle-totales');
 const btnToggleTotalTarjetas = document.getElementById('btn-toggle-total-tarjetas');
 const btnToggleEfectivo = document.getElementById('btn-toggle-efectivo');
 const btnVerHistorialEfectivo = document.getElementById('btn-ver-historial-efectivo');
+const btnVerHistorialTarjetas = document.getElementById('btn-ver-historial-tarjetas');
+const resumenHistorialTarjetas = document.getElementById('resumen-historial-tarjetas');
+const modalHistorialRetirosTarjetas = document.getElementById('modal-historial-retiros-tarjetas');
+const btnCerrarHistorialRetirosTarjetas = document.getElementById('btn-cerrar-historial-retiros-tarjetas');
+const listaHistorialRetirosTarjetas = document.getElementById('lista-historial-retiros-tarjetas');
+const btnVerHistorialGastos = document.getElementById('btn-ver-historial-gastos');
+const resumenHistorialGastos = document.getElementById('resumen-historial-gastos');
+const modalHistorialGastos = document.getElementById('modal-historial-gastos');
+const btnCerrarHistorialGastos = document.getElementById('btn-cerrar-historial-gastos');
+const listaHistorialGastos = document.getElementById('lista-historial-gastos');
+const btnVerMasHistorialGastos = document.getElementById('btn-ver-mas-historial-gastos');
 const tarjetaDestinoSelect = document.getElementById('tarjeta-destino');
 const grupoTarjeta = document.getElementById('grupo-tarjeta');
+const grupoFuenteGasto = document.getElementById('grupo-fuente-gasto');
+const fuenteGastoSelect = document.getElementById('fuente-gasto');
 const grupoTipo = document.getElementById('grupo-tipo');
 const modalAgregarTarjeta = document.getElementById('modal-agregar-tarjeta');
 const tituloModalTarjeta = document.getElementById('titulo-modal-tarjeta');
@@ -71,7 +88,7 @@ const modalDetalleTarjeta = document.getElementById('modal-detalle-tarjeta');
 const detalleNombreTarjeta = document.getElementById('detalle-nombre-tarjeta');
 const detalleSaldoTarjeta = document.getElementById('detalle-saldo-tarjeta');
 const inputMontoRetiro = document.getElementById('input-monto-retiro');
-const inputDescripcionRetiro = document.getElementById('input-descripcion-retiro');
+const selectTarjetaRetiro = document.getElementById('select-tarjeta-retiro');
 const inputFechaHoraRetiro = document.getElementById('input-fecha-hora-retiro');
 const historialRetirosTarjeta = document.getElementById('historial-retiros-tarjeta');
 const btnVerHistorialRetiros = document.getElementById('btn-ver-historial-retiros');
@@ -94,6 +111,35 @@ const selectDestinoCalendario = document.getElementById('select-destino-calendar
 const tablaGananciasSemanales = document.getElementById('tabla-ganancias-semanales');
 const btnAgregarGananciaSemanal = document.getElementById('btn-agregar-ganancia-semanal');
 const btnVerHistorialCalendario = document.getElementById('btn-ver-historial-calendario');
+const btnVerCalendarioRegistros = document.getElementById('btn-ver-calendario-registros');
+const modalCalendarioRegistros = document.getElementById('modal-calendario-registros');
+const btnCerrarCalendarioRegistros = document.getElementById('btn-cerrar-calendario-registros');
+const btnMesAnterior = document.getElementById('btn-mes-anterior');
+const btnMesSiguiente = document.getElementById('btn-mes-siguiente');
+const mesCalendarioRegistros = document.getElementById('mes-calendario-registros');
+const calendarioRegistrosGrid = document.getElementById('calendario-registros-grid');
+const detalleDiaRegistros = document.getElementById('detalle-dia-registros');
+const modalSeguridadCalendario = document.getElementById('modal-seguridad-calendario');
+const formSeguridadCalendario = document.getElementById('form-seguridad-calendario');
+const contrasenaCalendarioInput = document.getElementById('contrasena-calendario');
+const mensajeSeguridadCalendario = document.getElementById('mensaje-seguridad-calendario');
+const btnCancelarSeguridadCalendario = document.getElementById('btn-cancelar-seguridad-calendario');
+const modalEditarCalendarioVisual = document.getElementById('modal-editar-calendario-visual');
+const btnCerrarEditarCalendarioVisual = document.getElementById('btn-cerrar-editar-calendario-visual');
+const btnCancelarEditarCalendarioVisual = document.getElementById('btn-cancelar-editar-calendario-visual');
+const btnGuardarEditarCalendarioVisual = document.getElementById('btn-guardar-editar-calendario-visual');
+const inputDescripcionCalendarioVisual = document.getElementById('input-descripcion-calendario-visual');
+const inputFechaCalendarioVisual = document.getElementById('input-fecha-calendario-visual');
+const inputMontoCalendarioVisual = document.getElementById('input-monto-calendario-visual');
+const selectOrigenCalendarioVisual = document.getElementById('select-origen-calendario-visual');
+const btnVerOtrosMovimientos = document.getElementById('btn-ver-otros-movimientos');
+const listaOtrosMovimientos = document.getElementById('lista-otros-movimientos');
+const modalHistorialGrupo = document.getElementById('modal-historial-grupo');
+const btnCerrarHistorialGrupo = document.getElementById('btn-cerrar-historial-grupo');
+const btnVerMasHistorialGrupo = document.getElementById('btn-ver-mas-historial-grupo');
+const listaHistorialGrupo = document.getElementById('lista-historial-grupo');
+let historialGrupoItems = [];
+let historialGrupoCrearContenido = null;
 const modalHistorialCalendario = document.getElementById('modal-historial-calendario');
 const btnCerrarHistorialCalendario = document.getElementById('btn-cerrar-historial-calendario');
 const listaHistorialCalendarioCompleto = document.getElementById('lista-historial-calendario-completo');
@@ -103,6 +149,7 @@ const btnCancelarRetiroEfectivo = document.getElementById('btn-cancelar-retiro-e
 const btnGuardarRetiroEfectivo = document.getElementById('btn-guardar-retiro-efectivo');
 const inputMontoRetiroEfectivo = document.getElementById('input-monto-retiro-efectivo');
 const inputDescripcionRetiroEfectivo = document.getElementById('input-descripcion-retiro-efectivo');
+const inputFechaHoraRetiroEfectivo = document.getElementById('input-fecha-hora-retiro-efectivo');
 const detalleSaldoEfectivo = document.getElementById('detalle-saldo-efectivo');
 const historialRetirosEfectivo = document.getElementById('historial-retiros-efectivo');
 const modalConfirmarRetiroEfectivo = document.getElementById('modal-confirmar-retiro-efectivo');
@@ -149,6 +196,7 @@ const btnConfirmarCancelarEdicion = document.getElementById('btn-confirmar-cance
 let registroPendienteDeEliminar = null;
 let tarjetaPendienteDeEliminar = null;
 let retiroPendienteDeEliminar = null;
+let gastoPendienteDeEliminar = null;
 let gananciaPendienteDeEliminar = null;
 let temporizadorBloqueo = null;
 let registroPendienteDeGuardar = null;
@@ -163,6 +211,7 @@ let abonoEnCambioMetodo = null;
 let modoCambioMetodoAbono = false;
 let tarjetaDetalleActiva = null;
 let retiroEnEdicion = null;
+let tarjetaRetiroEnEdicion = null;
 let retiroEfectivoEnEdicion = null;
 let fechaRetiroEfectivoActual = '';
 let gananciaEnEdicion = null;
@@ -172,6 +221,42 @@ let tipoEdicionPendienteDeCancelar = null;
 let elementoCalendarioEnEdicion = null;
 let registroPendienteDePago = null;
 let deudaEnReasignacion = null;
+let mesCalendarioActual = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+let accionSeguridadCalendario = null;
+let movimientoCalendarioEnEdicion = null;
+let temporizadorCuentaRegresivaDia = null;
+
+function origenBaseRegistro(item) {
+    return item.origenTarjetaId || item.tarjetaDestinoId || item.metodo || (item.origenEfectivo || item.destinoEfectivo || item.metodo === 'efectivo' ? 'efectivo' : item.tarjetaId || '');
+}
+
+function asegurarBaseEdicionRegistro(item) {
+    if (!item || item.baseEdicionRegistro) return;
+    item.baseEdicionRegistro = {
+        monto: Number(item.monto) || 0,
+        descripcion: item.descripcion || item.cliente || '',
+        fechaHora: item.fechaHora || '',
+        origen: origenBaseRegistro(item)
+    };
+}
+
+function actualizarEstadoEdicionRegistro(item, origen = origenBaseRegistro(item)) {
+    asegurarBaseEdicionRegistro(item);
+    const base = item.baseEdicionRegistro;
+    item.modificadoRegistro = Number(item.monto) !== Number(base.monto) ||
+        (item.descripcion || item.cliente || '') !== base.descripcion ||
+        (item.fechaHora || '') !== base.fechaHora ||
+        origen !== base.origen;
+}
+
+function normalizarBasesEdicion() {
+    [...registros, ...gananciasSemanales, ...retirosEfectivo, ...gastosMios].forEach(asegurarBaseEdicionRegistro);
+    [...registros, ...gananciasSemanales].forEach(item => (item.abonos || []).forEach(asegurarBaseEdicionRegistro));
+    tarjetas.forEach(tarjeta => (tarjeta.retiros || []).forEach(retiro => {
+        retiro.tarjetaId = tarjeta.id;
+        asegurarBaseEdicionRegistro(retiro);
+    }));
+}
 
 const CONTRASENA_POR_DEFECTO = '0953690849P';
 const CODIGO_RECUPERACION = '095369084906042008';
@@ -467,6 +552,7 @@ function renderTarjetas() {
     }
     
     actualizarSelectorTarjetas();
+    actualizarSelectorTarjetasRetiro();
     actualizarMontoTotalTarjetas();
 }
 
@@ -500,6 +586,9 @@ function calcularEfectivoDisponible() {
     retirosEfectivo.forEach(retiro => {
         efectivo -= Number(retiro.monto) || 0;
     });
+    gastosMios.forEach(gasto => {
+        if (gasto.origenEfectivo) efectivo -= Number(gasto.monto) || 0;
+    });
     return efectivo;
 }
 
@@ -526,7 +615,16 @@ function actualizarMontoEfectivo() {
     detalleSaldoEfectivo.textContent = `$${efectivo.toFixed(2)}`;
 }
 
-function alternarVisibilidadTotalGeneral() {
+function actualizarMontoTotalActual() {
+    const totalActual = calcularEfectivoDisponible() + tarjetas.reduce((total, tarjeta) => total + (Number(tarjeta.monto) || 0), 0);
+    montoTotalGeneralElement.textContent = totalGeneralOculto ? '••••••' : `$${totalActual.toFixed(2)}`;
+}
+
+function alternarVisibilidadTotalGeneral(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => alternarVisibilidadTotalGeneral(true));
+        return;
+    }
     totalGeneralOculto = !totalGeneralOculto;
     localStorage.setItem(CLAVE_TOTAL_GENERAL_OCULTO, String(totalGeneralOculto));
     actualizarVisibilidadTotales();
@@ -534,25 +632,43 @@ function alternarVisibilidadTotalGeneral() {
     guardarPreferenciasVisibilidad();
 }
 
-function alternarVisibilidadTotalTarjetas() {
+function alternarVisibilidadTotalTarjetas(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => alternarVisibilidadTotalTarjetas(true));
+        return;
+    }
     totalTarjetasOculto = !totalTarjetasOculto;
     localStorage.setItem(CLAVE_TOTAL_TARJETAS_OCULTO, String(totalTarjetasOculto));
     actualizarVisibilidadTotales();
     guardarPreferenciasVisibilidad();
 }
 
-btnToggleTotales.addEventListener('click', alternarVisibilidadTotalGeneral);
-btnToggleTotalTarjetas.addEventListener('click', alternarVisibilidadTotalTarjetas);
-btnToggleEfectivo.addEventListener('click', function() {
+function alternarVisibilidadEfectivo(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => alternarVisibilidadEfectivo(true));
+        return;
+    }
     efectivoOculto = !efectivoOculto;
     localStorage.setItem(CLAVE_EFECTIVO_OCULTO, String(efectivoOculto));
     actualizarVisibilidadTotales();
     guardarPreferenciasVisibilidad();
-});
+}
+
+btnToggleTotales.addEventListener('click', () => alternarVisibilidadTotalGeneral());
+btnToggleTotalTarjetas.addEventListener('click', () => alternarVisibilidadTotalTarjetas());
+btnToggleEfectivo.addEventListener('click', () => alternarVisibilidadEfectivo());
 
 function actualizarSelectorTarjetas() {
     const opcionesActuales = Array.from(tarjetaDestinoSelect.querySelectorAll('option')).slice(1);
     opcionesActuales.forEach(opt => opt.remove());
+
+    tarjetaDestinoSelect.querySelector('option:first-child').textContent = '-- Seleccionar destino --';
+    tarjetaDestinoSelect.querySelector('option:first-child').value = '';
+
+    const opcionEfectivo = document.createElement('option');
+    opcionEfectivo.value = 'efectivo';
+    opcionEfectivo.textContent = '💵 Pago en efectivo';
+    tarjetaDestinoSelect.appendChild(opcionEfectivo);
     
     tarjetas.forEach(tarjeta => {
         const option = document.createElement('option');
@@ -560,9 +676,40 @@ function actualizarSelectorTarjetas() {
         option.textContent = `${tarjeta.nombre} ($${tarjeta.monto.toFixed(2)})`;
         tarjetaDestinoSelect.appendChild(option);
     });
+    actualizarFuenteGasto();
 }
 
-function abrirModalAgregarTarjeta() {
+function actualizarFuenteGasto() {
+    if (!fuenteGastoSelect) return;
+    const valorActual = fuenteGastoSelect.value;
+    fuenteGastoSelect.innerHTML = '<option value="">-- Seleccionar origen --</option><option value="efectivo">💵 Efectivo</option>';
+    tarjetas.forEach(tarjeta => {
+        const option = document.createElement('option');
+        option.value = tarjeta.id;
+        option.textContent = `💳 ${tarjeta.nombre} ($${Number(tarjeta.monto).toFixed(2)})`;
+        fuenteGastoSelect.appendChild(option);
+    });
+    if (valorActual && Array.from(fuenteGastoSelect.options).some(option => option.value === valorActual)) {
+        fuenteGastoSelect.value = valorActual;
+    }
+}
+
+function actualizarSelectorTarjetasRetiro() {
+    if (!selectTarjetaRetiro) return;
+    selectTarjetaRetiro.innerHTML = '';
+    tarjetas.forEach(tarjeta => {
+        const option = document.createElement('option');
+        option.value = tarjeta.id;
+        option.textContent = `${tarjeta.nombre} ($${Number(tarjeta.monto).toFixed(2)})`;
+        selectTarjetaRetiro.appendChild(option);
+    });
+}
+
+function abrirModalAgregarTarjeta(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirModalAgregarTarjeta(true));
+        return;
+    }
     if (guardandoTarjeta) return;
     guardandoTarjeta = false;
     btnGuardarTarjeta.disabled = false;
@@ -679,7 +826,11 @@ async function guardarNuevaTarjeta() {
     }
 }
 
-function editarTarjeta(id) {
+function editarTarjeta(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => editarTarjeta(id, true));
+        return;
+    }
     const tarjeta = tarjetas.find(t => t.id === id);
     if (!tarjeta) return;
 
@@ -703,7 +854,11 @@ function solicitarCancelarTarjeta() {
     abrirConfirmacionCancelarEdicion('tarjeta');
 }
 
-function eliminarTarjeta(id) {
+function eliminarTarjeta(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarTarjeta(id, true));
+        return;
+    }
     const tarjeta = tarjetas.find(t => t.id === id);
     if (!tarjeta) return;
 
@@ -751,6 +906,7 @@ async function sincronizarTarjetasConSupabase() {
 }
 
 function guardarTarjetas() {
+    normalizarBasesEdicion();
     localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
     return sincronizarTarjetasConSupabase();
 }
@@ -777,7 +933,9 @@ function abrirDetalleTarjeta(id) {
     tarjetaDetalleActiva = tarjeta;
     detalleNombreTarjeta.textContent = tarjeta.nombre;
     inputMontoRetiro.value = '';
-    inputDescripcionRetiro.value = '';
+    actualizarSelectorTarjetasRetiro();
+    selectTarjetaRetiro.value = tarjeta.id;
+    selectTarjetaRetiro.disabled = false;
     inputFechaHoraRetiro.value = obtenerFechaHoraLocal();
     cancelarEdicionRetiro();
     renderDetalleTarjeta();
@@ -802,7 +960,7 @@ function crearHtmlRetiro(retiro) {
     return `
         <div class="retiro-item">
             <div>
-                <strong>${retiro.descripcion || 'Retiro de dinero'}</strong>
+                <strong>${retiro.descripcion || 'Retiro de dinero'} ${etiquetaModificacion(retiro)}</strong>
                 <span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span>
             </div>
             <div class="retiro-datos">
@@ -820,7 +978,11 @@ function crearHtmlRetiro(retiro) {
     `;
 }
 
-function abrirHistorialRetiros() {
+function abrirHistorialRetiros(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialRetiros(true));
+        return;
+    }
     if (!tarjetaDetalleActiva) return;
 
     const retiros = [...(tarjetaDetalleActiva.retiros || [])].sort((a, b) =>
@@ -848,15 +1010,21 @@ function guardarRetiroTarjeta() {
     if (!tarjetaDetalleActiva) return;
 
     const monto = parseFloat(inputMontoRetiro.value);
-    const descripcion = inputDescripcionRetiro.value.trim();
+    const tarjetaSeleccionada = tarjetas.find(tarjeta => tarjeta.id === selectTarjetaRetiro.value);
     const fechaHora = inputFechaHoraRetiro.value;
+
+    if (!tarjetaSeleccionada) {
+        alert('Selecciona la tarjeta de la que quieres retirar.');
+        selectTarjetaRetiro.focus();
+        return;
+    }
 
     if (isNaN(monto) || monto <= 0) {
         alert('Ingresa un monto de retiro válido.');
         inputMontoRetiro.focus();
         return;
     }
-    const saldoDisponible = tarjetaDetalleActiva.monto + (retiroEnEdicion ? retiroEnEdicion.monto : 0);
+    const saldoDisponible = tarjetaSeleccionada.monto + (retiroEnEdicion && tarjetaRetiroEnEdicion === tarjetaSeleccionada ? retiroEnEdicion.monto : 0);
     if (monto > saldoDisponible) {
         alert('El retiro no puede ser mayor que el saldo disponible.');
         inputMontoRetiro.focus();
@@ -869,37 +1037,56 @@ function guardarRetiroTarjeta() {
     }
 
     if (retiroEnEdicion) {
-        tarjetaDetalleActiva.monto += retiroEnEdicion.monto - monto;
+        tarjetaRetiroEnEdicion.monto += retiroEnEdicion.monto;
+        if (tarjetaRetiroEnEdicion !== tarjetaSeleccionada) {
+            tarjetaSeleccionada.monto -= monto;
+            tarjetaSeleccionada.retiros = Array.isArray(tarjetaSeleccionada.retiros) ? tarjetaSeleccionada.retiros : [];
+            tarjetaSeleccionada.retiros.push(retiroEnEdicion);
+            tarjetaRetiroEnEdicion.retiros = tarjetaRetiroEnEdicion.retiros.filter(item => item.id !== retiroEnEdicion.id);
+        } else {
+            tarjetaSeleccionada.monto -= monto;
+        }
         retiroEnEdicion.monto = monto;
-        retiroEnEdicion.descripcion = descripcion || 'Retiro de dinero';
+        retiroEnEdicion.descripcion = 'Retiro por tarjeta';
         retiroEnEdicion.fechaHora = fechaHora;
+        actualizarEstadoEdicionRegistro(retiroEnEdicion, tarjetaSeleccionada.id);
     } else {
-        tarjetaDetalleActiva.monto -= monto;
-        tarjetaDetalleActiva.retiros.push({
+        tarjetaSeleccionada.monto -= monto;
+        tarjetaSeleccionada.retiros = Array.isArray(tarjetaSeleccionada.retiros) ? tarjetaSeleccionada.retiros : [];
+        tarjetaSeleccionada.retiros.push({
             id: Date.now().toString(),
             monto,
-            descripcion: descripcion || 'Retiro de dinero',
+            descripcion: 'Retiro por tarjeta',
             fechaHora
         });
     }
     guardarTarjetas();
     renderTarjetas();
+    renderResumenHistorialTarjetas();
     cancelarEdicionRetiro();
+    tarjetaDetalleActiva = tarjetaSeleccionada;
+    detalleNombreTarjeta.textContent = tarjetaSeleccionada.nombre;
     renderDetalleTarjeta();
     inputMontoRetiro.value = '';
-    inputDescripcionRetiro.value = '';
+    selectTarjetaRetiro.value = tarjetaDetalleActiva.id;
     inputFechaHoraRetiro.value = obtenerFechaHoraLocal();
 }
 
-function editarRetiroTarjeta(id) {
+function editarRetiroTarjeta(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => editarRetiroTarjeta(id, true));
+        return;
+    }
     if (!tarjetaDetalleActiva) return;
 
     const retiro = tarjetaDetalleActiva.retiros.find(item => item.id === id);
     if (!retiro) return;
 
     retiroEnEdicion = retiro;
+    tarjetaRetiroEnEdicion = tarjetaDetalleActiva;
     inputMontoRetiro.value = retiro.monto;
-    inputDescripcionRetiro.value = retiro.descripcion || '';
+    selectTarjetaRetiro.value = tarjetaDetalleActiva.id;
+    selectTarjetaRetiro.disabled = false;
     inputFechaHoraRetiro.value = retiro.fechaHora;
     textoGuardarRetiro.textContent = 'Guardar cambios';
     iconoGuardarRetiro.className = 'fa-solid fa-check';
@@ -909,12 +1096,18 @@ function editarRetiroTarjeta(id) {
 
 function cancelarEdicionRetiro() {
     retiroEnEdicion = null;
+    tarjetaRetiroEnEdicion = null;
+    if (selectTarjetaRetiro) selectTarjetaRetiro.disabled = false;
     if (textoGuardarRetiro) textoGuardarRetiro.textContent = 'Retirar dinero';
     if (iconoGuardarRetiro) iconoGuardarRetiro.className = 'fa-solid fa-arrow-up-from-bracket';
     if (btnCancelarEdicionRetiro) btnCancelarEdicionRetiro.hidden = true;
 }
 
-function eliminarRetiroTarjeta(id) {
+function eliminarRetiroTarjeta(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarRetiroTarjeta(id, true));
+        return;
+    }
     if (!tarjetaDetalleActiva) return;
 
     const retiro = tarjetaDetalleActiva.retiros.find(item => item.id === id);
@@ -933,7 +1126,7 @@ function renderHistorialRetirosEfectivo() {
         ? '<p class="historial-vacio">Todavía no hay retiros registrados.</p>'
         : retiros.map(retiro => `
             <div class="retiro-item">
-                <div><strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')}</strong><span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+                <div><strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')} ${etiquetaModificacion(retiro)}</strong><span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
                 <div class="retiro-datos"><b>-$${Number(retiro.monto).toFixed(2)}</b><div class="retiro-acciones">
                     <button type="button" class="btn-retiro-editar" data-retiro-efectivo-editar="${retiro.id}" title="Editar retiro" aria-label="Editar retiro"><i class="fa-solid fa-pen"></i></button>
                     <button type="button" class="btn-retiro-eliminar" data-retiro-efectivo-eliminar="${retiro.id}" title="Eliminar retiro" aria-label="Eliminar retiro"><i class="fa-solid fa-xmark"></i></button>
@@ -941,15 +1134,54 @@ function renderHistorialRetirosEfectivo() {
             </div>`).join('');
 }
 
-function crearHtmlRetiroEfectivo(retiro) {
+function etiquetaModificacion(item) {
+    const modificado = Boolean(item.modificadoRegistro || item.modificadoCalendario);
+    return `<small class="estado-edicion ${modificado ? 'registro-modificado' : 'registro-original'}">${modificado ? 'Modificado' : 'Original'}</small>`;
+}
+
+function crearHtmlRetiroEfectivo(retiro, compacto = false) {
+    const acciones = compacto ? '' : `
+        <div class="retiro-acciones">
+            <button type="button" class="btn-retiro-editar" data-retiro-efectivo-editar="${retiro.id}" title="Editar retiro" aria-label="Editar retiro">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            <button type="button" class="btn-retiro-eliminar" data-retiro-efectivo-eliminar="${retiro.id}" title="Eliminar retiro" aria-label="Eliminar retiro">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>`;
     return `
-        <div class="cash-history-item">
+        <div class="cash-history-item ${compacto ? '' : 'cash-history-item-actions'}">
             <div class="cash-history-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
             <div class="cash-history-data">
-                <strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')}</strong>
+                <strong>${escaparHtml(retiro.descripcion || 'Retiro de efectivo')} ${etiquetaModificacion(retiro)}</strong>
                 <span>${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span>
             </div>
-            <b>-$${Number(retiro.monto).toFixed(2)}</b>
+            <div class="retiro-datos"><b>-$${Number(retiro.monto).toFixed(2)}</b>${acciones}</div>
+        </div>`;
+}
+
+function obtenerRetirosTarjetas() {
+    return tarjetas.flatMap(tarjeta => (Array.isArray(tarjeta.retiros) ? tarjeta.retiros : []).map(retiro => ({
+        ...retiro,
+        tarjetaId: tarjeta.id,
+        tarjetaNombre: tarjeta.nombre
+    }))).sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+}
+
+function crearHtmlRetiroTarjeta(retiro, compacto = false) {
+    const acciones = compacto ? '' : `
+        <div class="retiro-acciones">
+            <button type="button" class="btn-retiro-editar" data-retiro-tarjeta-editar="${retiro.id}" title="Editar retiro" aria-label="Editar retiro">
+                <i class="fa-solid fa-pen"></i>
+            </button>
+            <button type="button" class="btn-retiro-eliminar" data-retiro-tarjeta-eliminar="${retiro.id}" title="Eliminar retiro" aria-label="Eliminar retiro">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>`;
+    return `
+        <div class="retiro-item ${compacto ? 'retiro-tarjeta-resumen' : ''}">
+            <div><strong>${escaparHtml(retiro.descripcion || 'Retiro por tarjeta')} ${etiquetaModificacion(retiro)}</strong><span>${escaparHtml(retiro.tarjetaNombre || 'Tarjeta')} · ${new Date(retiro.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+            <div class="retiro-datos"><b>-$${Number(retiro.monto).toFixed(2)}</b>${acciones}</div>
         </div>`;
 }
 
@@ -959,10 +1191,184 @@ function renderResumenHistorialEfectivo() {
         .slice(0, 3);
     resumenHistorialEfectivo.innerHTML = retiros.length === 0
         ? `<div class="cash-history-empty"><i class="fa-solid fa-wallet"></i><strong>Aún no hay retiros de efectivo</strong><span>Cuando registres una salida, aquí aparecerán tus últimos movimientos.</span></div>`
-        : retiros.map(crearHtmlRetiroEfectivo).join('');
+        : retiros.map(retiro => crearHtmlRetiroEfectivo(retiro, true)).join('');
 }
 
-function abrirHistorialRetirosEfectivo() {
+function renderResumenHistorialTarjetas() {
+    if (!resumenHistorialTarjetas) return;
+    const retiros = obtenerRetirosTarjetas().slice(0, 3);
+    resumenHistorialTarjetas.innerHTML = retiros.length === 0
+        ? `<div class="cash-history-empty card-history-empty"><i class="fa-solid fa-credit-card"></i><strong>Aún no hay retiros por tarjeta</strong><span>Cuando retires dinero de una tarjeta, aquí aparecerán tus últimos movimientos.</span></div>`
+        : retiros.map(retiro => crearHtmlRetiroTarjeta(retiro, true)).join('');
+}
+
+function obtenerNombreOrigenGasto(gasto) {
+    return gasto.origenEfectivo ? 'Efectivo' : gasto.origenTarjetaNombre || tarjetas.find(tarjeta => tarjeta.id === gasto.origenTarjetaId)?.nombre || 'Tarjeta';
+}
+
+function crearHtmlGasto(gasto, compacto = false) {
+    const acciones = `
+        <div class="retiro-acciones">
+            <button type="button" class="btn-retiro-editar" data-gasto-editar="${gasto.id}" title="Editar gasto" aria-label="Editar gasto"><i class="fa-solid fa-pen"></i></button>
+            <button type="button" class="btn-retiro-eliminar" data-gasto-eliminar="${gasto.id}" title="Eliminar gasto" aria-label="Eliminar gasto"><i class="fa-solid fa-xmark"></i></button>
+        </div>`;
+    return `<div class="retiro-item gasto-item" data-gasto-id="${escaparHtml(gasto.id)}">
+        <div><strong>${escaparHtml(gasto.descripcion || 'Gasto mío')} ${etiquetaModificacion(gasto)}</strong><span>${escaparHtml(obtenerNombreOrigenGasto(gasto))} · ${new Date(gasto.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+        <div class="retiro-datos"><b>-$${Number(gasto.monto).toFixed(2)}</b>${acciones}</div>
+    </div>`;
+}
+
+function obtenerOpcionesOrigenGasto(origenActual) {
+    const opciones = [
+        `<option value="efectivo" ${origenActual === 'efectivo' ? 'selected' : ''}>Efectivo</option>`
+    ];
+    tarjetas.forEach(tarjeta => {
+        opciones.push(`<option value="${escaparHtml(tarjeta.id)}" ${origenActual === tarjeta.id ? 'selected' : ''}>${escaparHtml(tarjeta.nombre)} ($${Number(tarjeta.monto).toFixed(2)})</option>`);
+    });
+    return opciones.join('');
+}
+
+function crearEditorGastoMio(gasto) {
+    const origenActual = gasto.origenEfectivo ? 'efectivo' : gasto.origenTarjetaId;
+    const editor = document.createElement('div');
+    editor.className = 'gasto-editor-inline';
+    editor.innerHTML = `
+        <div class="editor-registro-campo"><label>Descripción</label><input type="text" class="gasto-editor-descripcion" value="${escaparHtml(gasto.descripcion || '')}"></div>
+        <div class="editor-registro-campo"><label>Monto ($)</label><input type="number" class="gasto-editor-monto" min="0.01" step="0.01" value="${Number(gasto.monto).toFixed(2)}"></div>
+        <div class="editor-registro-campo"><label>Fecha y hora</label><input type="datetime-local" class="gasto-editor-fecha" value="${escaparHtml(gasto.fechaHora || '')}"></div>
+        <div class="editor-registro-campo"><label>Origen</label><select class="gasto-editor-origen">${obtenerOpcionesOrigenGasto(origenActual)}</select></div>
+        <div class="editor-registro-acciones"><button type="button" class="btn btn-cancel gasto-editor-cancelar">Cancelar</button><button type="button" class="btn btn-save gasto-editor-guardar"><i class="fa-solid fa-check"></i> Guardar</button></div>`;
+    editor.querySelector('.gasto-editor-cancelar').addEventListener('click', () => editor.remove());
+    editor.querySelector('.gasto-editor-guardar').addEventListener('click', async () => {
+        const monto = Number(editor.querySelector('.gasto-editor-monto').value);
+        const descripcion = editor.querySelector('.gasto-editor-descripcion').value.trim();
+        const fechaHora = editor.querySelector('.gasto-editor-fecha').value;
+        const origen = editor.querySelector('.gasto-editor-origen').value;
+        if (!Number.isFinite(monto) || monto <= 0 || !descripcion || !fechaHora || !origen) return;
+        const saldoDisponible = obtenerSaldoOrigenGasto(origen, gasto);
+        if (monto > saldoDisponible) {
+            alert(`No hay suficiente dinero en el origen seleccionado. Disponible: $${saldoDisponible.toFixed(2)}.`);
+            return;
+        }
+        devolverMontoGastoAlOrigen(gasto);
+        gasto.monto = monto;
+        gasto.descripcion = descripcion;
+        gasto.fechaHora = fechaHora;
+        gasto.origenEfectivo = origen === 'efectivo';
+        gasto.origenTarjetaId = gasto.origenEfectivo ? null : origen;
+        gasto.origenTarjetaNombre = gasto.origenEfectivo ? 'Efectivo' : tarjetas.find(tarjeta => tarjeta.id === origen)?.nombre || '';
+        actualizarEstadoEdicionRegistro(gasto, origen);
+        descontarMontoGastoDelOrigen(gasto);
+        await guardarRegistroEnSupabase(gasto);
+        await guardarTarjetas();
+        guardarYActualizar();
+        if (!modalHistorialRegistros.hidden) abrirOtrosMovimientos();
+    });
+    return editor;
+}
+
+function renderResumenHistorialGastos() {
+    if (!resumenHistorialGastos) return;
+    const gastos = [...gastosMios].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora)).slice(0, 3);
+    resumenHistorialGastos.innerHTML = gastos.length === 0
+        ? '<div class="cash-history-empty gastos-history-empty"><i class="fa-solid fa-bag-shopping"></i><strong>Aún no hay gastos registrados</strong><span>Los gastos que registres aparecerán aquí.</span></div>'
+        : gastos.map(gasto => crearHtmlGasto(gasto, true)).join('');
+}
+
+function abrirHistorialGastos(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialGastos(true));
+        return;
+    }
+    const gastos = [...gastosMios].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
+    listaHistorialGastos.innerHTML = gastos.length === 0
+        ? '<p class="historial-vacio">Todavía no hay gastos registrados.</p>'
+        : gastos.map((gasto, indice) => `<div class="historial-gasto-fila" ${indice >= 3 ? 'hidden' : ''}>${crearHtmlGasto(gasto)}</div>`).join('');
+    btnVerMasHistorialGastos.hidden = gastos.length <= 3;
+    btnVerMasHistorialGastos.textContent = 'Ver más';
+    btnVerMasHistorialGastos.dataset.expandido = 'false';
+    modalHistorialGastos.hidden = false;
+    modalHistorialGastos.style.display = 'flex';
+}
+
+function cerrarHistorialGastos() {
+    modalHistorialGastos.hidden = true;
+    modalHistorialGastos.style.display = 'none';
+}
+
+function editarGastoMio(id, contenedor = listaHistorialGastos, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => editarGastoMio(id, contenedor, true));
+        return;
+    }
+    const gasto = gastosMios.find(item => item.id === id);
+    if (!gasto || !contenedor) return;
+    const fila = contenedor.querySelector(`[data-gasto-id="${CSS.escape(id)}"]`);
+    if (!fila || fila.nextElementSibling?.classList.contains('gasto-editor-inline')) return;
+    fila.after(crearEditorGastoMio(gasto));
+}
+
+function eliminarGastoMio(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarGastoMio(id, true));
+        return;
+    }
+    const gasto = gastosMios.find(item => item.id === id);
+    if (!gasto) return;
+    gastoPendienteDeEliminar = gasto;
+    modalTituloEliminacion.textContent = '¿Eliminar este gasto?';
+    modalMensajeEliminacion.textContent = 'El dinero volverá al origen seleccionado y esta acción no se puede deshacer.';
+    modalEliminar.hidden = false;
+    btnCancelarEliminacion.focus();
+}
+
+function abrirHistorialRetirosTarjetas(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialRetirosTarjetas(true));
+        return;
+    }
+    const retiros = obtenerRetirosTarjetas();
+    listaHistorialRetirosTarjetas.innerHTML = retiros.length === 0
+        ? '<p class="historial-vacio">Todavía no hay retiros por tarjeta registrados.</p>'
+        : retiros.map(retiro => crearHtmlRetiroTarjeta(retiro)).join('');
+    modalHistorialRetirosTarjetas.hidden = false;
+    modalHistorialRetirosTarjetas.style.display = 'flex';
+}
+
+function cerrarHistorialRetirosTarjetas() {
+    modalHistorialRetirosTarjetas.hidden = true;
+    modalHistorialRetirosTarjetas.style.display = 'none';
+}
+
+function buscarRetiroTarjeta(id) {
+    for (const tarjeta of tarjetas) {
+        const retiro = (tarjeta.retiros || []).find(item => item.id === id);
+        if (retiro) return { tarjeta, retiro };
+    }
+    return null;
+}
+
+function editarRetiroTarjetaDesdeHistorial(id) {
+    const encontrado = buscarRetiroTarjeta(id);
+    if (!encontrado) return;
+    cerrarHistorialRetirosTarjetas();
+    abrirDetalleTarjeta(encontrado.tarjeta.id);
+    editarRetiroTarjeta(id);
+}
+
+function eliminarRetiroTarjetaDesdeHistorial(id) {
+    const encontrado = buscarRetiroTarjeta(id);
+    if (!encontrado) return;
+    cerrarHistorialRetirosTarjetas();
+    tarjetaDetalleActiva = encontrado.tarjeta;
+    eliminarRetiroTarjeta(id);
+}
+
+function abrirHistorialRetirosEfectivo(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialRetirosEfectivo(true));
+        return;
+    }
     const retiros = [...retirosEfectivo].sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
     document.getElementById('titulo-historial-retiros').innerHTML = '<i class="fa-solid fa-money-bill-transfer"></i> Historial de efectivo';
     listaHistorialRetirosCompleto.innerHTML = retiros.length === 0
@@ -977,6 +1383,7 @@ function abrirModalRetiroEfectivo() {
     fechaRetiroEfectivoActual = obtenerFechaHoraLocal();
     inputMontoRetiroEfectivo.value = '';
     inputDescripcionRetiroEfectivo.value = '';
+    inputFechaHoraRetiroEfectivo.value = fechaRetiroEfectivoActual;
     btnGuardarRetiroEfectivo.innerHTML = '<i class="fa-solid fa-check"></i> Guardar retiro';
     actualizarMontoEfectivo();
     renderHistorialRetirosEfectivo();
@@ -995,6 +1402,7 @@ function abrirConfirmacionRetiroEfectivo(monto, descripcion, fechaHora) {
     fechaRetiroEfectivoActual = fechaHora || obtenerFechaHoraLocal();
     inputMontoRetiroEfectivo.value = monto;
     inputDescripcionRetiroEfectivo.value = descripcion;
+    inputFechaHoraRetiroEfectivo.value = fechaRetiroEfectivoActual;
     mensajeErrorRetiroConfirmacion.hidden = true;
     confirmacionSaldoInsuficiente.hidden = true;
     confirmacionDescripcionRetiro.textContent = descripcion;
@@ -1036,7 +1444,7 @@ function mostrarSaldoInsuficienteEnConfirmacion(monto, saldoDisponible) {
 async function guardarRetiroEfectivo() {
     const monto = Number(inputMontoRetiroEfectivo.value);
     const descripcion = inputDescripcionRetiroEfectivo.value.trim();
-    const fechaHora = fechaRetiroEfectivoActual || obtenerFechaHoraLocal();
+    const fechaHora = inputFechaHoraRetiroEfectivo.value || fechaRetiroEfectivoActual || obtenerFechaHoraLocal();
     if (!descripcion) {
         alert('Escribe una descripción para el retiro.');
         inputDescripcionRetiroEfectivo.focus();
@@ -1066,6 +1474,7 @@ async function guardarRetiroEfectivo() {
     retiro.descripcion = descripcion;
     retiro.fechaHora = fechaHora;
     retiro.estado = 'pagado';
+    if (retiroEfectivoEnEdicion) actualizarEstadoEdicionRegistro(retiro);
     const id = await guardarRegistroEnSupabase(retiro);
     if (!id) return;
     retiro.id = id;
@@ -1076,18 +1485,27 @@ async function guardarRetiroEfectivo() {
     cerrarConfirmacionRetiroEfectivo();
 }
 
-function editarRetiroEfectivo(id) {
+function editarRetiroEfectivo(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => editarRetiroEfectivo(id, true));
+        return;
+    }
     const retiro = retirosEfectivo.find(item => item.id === id);
     if (!retiro) return;
     retiroEfectivoEnEdicion = retiro;
     inputMontoRetiroEfectivo.value = retiro.monto;
     inputDescripcionRetiroEfectivo.value = retiro.descripcion || '';
     fechaRetiroEfectivoActual = retiro.fechaHora;
+    inputFechaHoraRetiroEfectivo.value = retiro.fechaHora;
     btnGuardarRetiroEfectivo.innerHTML = '<i class="fa-solid fa-check"></i> Guardar cambios';
     inputMontoRetiroEfectivo.focus();
 }
 
-function eliminarRetiroEfectivo(id) {
+function eliminarRetiroEfectivo(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarRetiroEfectivo(id, true));
+        return;
+    }
     const retiro = retirosEfectivo.find(item => item.id === id);
     if (!retiro) return;
     retiroPendienteDeEliminar = { efectivo: true, retiro };
@@ -1103,7 +1521,12 @@ modalRetiroEfectivo.addEventListener('click', event => {
     if (event.target === modalRetiroEfectivo) cerrarModalRetiroEfectivo();
 });
 btnGuardarRetiroEfectivo.addEventListener('click', guardarRetiroEfectivo);
-btnVerHistorialEfectivo.addEventListener('click', abrirHistorialRetirosEfectivo);
+btnVerHistorialEfectivo.addEventListener('click', () => abrirHistorialRetirosEfectivo());
+if (btnVerHistorialTarjetas) btnVerHistorialTarjetas.addEventListener('click', () => abrirHistorialRetirosTarjetas());
+btnCerrarHistorialRetirosTarjetas.addEventListener('click', cerrarHistorialRetirosTarjetas);
+modalHistorialRetirosTarjetas.addEventListener('click', event => {
+    if (event.target === modalHistorialRetirosTarjetas) cerrarHistorialRetirosTarjetas();
+});
 btnCerrarConfirmarRetiroEfectivo.addEventListener('click', cerrarConfirmacionRetiroEfectivo);
 btnCancelarConfirmarRetiro.addEventListener('click', cerrarConfirmacionRetiroEfectivo);
 btnConfirmarRetiroEfectivo.addEventListener('click', guardarRetiroEfectivo);
@@ -1115,6 +1538,112 @@ historialRetirosEfectivo.addEventListener('click', event => {
     const eliminar = event.target.closest('[data-retiro-efectivo-eliminar]');
     if (editar) editarRetiroEfectivo(editar.dataset.retiroEfectivoEditar);
     if (eliminar) eliminarRetiroEfectivo(eliminar.dataset.retiroEfectivoEliminar);
+});
+
+listaHistorialRetirosCompleto.addEventListener('click', event => {
+    const editar = event.target.closest('[data-retiro-efectivo-editar]');
+    const eliminar = event.target.closest('[data-retiro-efectivo-eliminar]');
+    if (editar) {
+        cerrarHistorialRetiros();
+        abrirModalRetiroEfectivo();
+        editarRetiroEfectivo(editar.dataset.retiroEfectivoEditar);
+    }
+    if (eliminar) {
+        cerrarHistorialRetiros();
+        eliminarRetiroEfectivo(eliminar.dataset.retiroEfectivoEliminar);
+    }
+});
+
+listaHistorialRetirosTarjetas.addEventListener('click', event => {
+    const editar = event.target.closest('[data-retiro-tarjeta-editar]');
+    const eliminar = event.target.closest('[data-retiro-tarjeta-eliminar]');
+    if (editar) editarRetiroTarjetaDesdeHistorial(editar.dataset.retiroTarjetaEditar);
+    if (eliminar) eliminarRetiroTarjetaDesdeHistorial(eliminar.dataset.retiroTarjetaEliminar);
+});
+
+btnVerHistorialGastos.addEventListener('click', () => abrirHistorialGastos());
+btnCerrarHistorialGastos.addEventListener('click', cerrarHistorialGastos);
+btnVerMasHistorialGastos.addEventListener('click', () => {
+    const mostrarTodo = btnVerMasHistorialGastos.dataset.expandido !== 'true';
+    listaHistorialGastos.querySelectorAll('.historial-gasto-fila').forEach((fila, indice) => {
+        if (indice >= 3) fila.hidden = !mostrarTodo;
+    });
+    btnVerMasHistorialGastos.dataset.expandido = String(mostrarTodo);
+    btnVerMasHistorialGastos.textContent = mostrarTodo ? 'Ver menos' : 'Ver más';
+});
+modalHistorialGastos.addEventListener('click', event => {
+    if (event.target === modalHistorialGastos) cerrarHistorialGastos();
+});
+listaHistorialGastos.addEventListener('click', event => {
+    const editar = event.target.closest('[data-gasto-editar]');
+    const eliminar = event.target.closest('[data-gasto-eliminar]');
+    if (editar) editarGastoMio(editar.dataset.gastoEditar);
+    if (eliminar) eliminarGastoMio(eliminar.dataset.gastoEliminar);
+});
+
+resumenHistorialGastos.addEventListener('click', event => {
+    const editar = event.target.closest('[data-gasto-editar]');
+    const eliminar = event.target.closest('[data-gasto-eliminar]');
+    if (editar) editarGastoMio(editar.dataset.gastoEditar, resumenHistorialGastos);
+    if (eliminar) eliminarGastoMio(eliminar.dataset.gastoEliminar);
+});
+
+listaOtrosMovimientos.addEventListener('click', event => {
+    const editarRegistro = event.target.closest('.btn-editar-otro-registro');
+    const eliminarRegistroOtro = event.target.closest('.btn-eliminar-otro-registro');
+    const editarGasto = event.target.closest('[data-gasto-editar]');
+    const eliminarGasto = event.target.closest('[data-gasto-eliminar]');
+    const editarEfectivo = event.target.closest('[data-retiro-efectivo-editar]');
+    const eliminarEfectivo = event.target.closest('[data-retiro-efectivo-eliminar]');
+    const editarTarjeta = event.target.closest('[data-retiro-tarjeta-editar]');
+    const eliminarTarjeta = event.target.closest('[data-retiro-tarjeta-eliminar]');
+    if (editarRegistro) {
+        const item = [...registros, ...gananciasSemanales].find(registro => registro.id === editarRegistro.closest('[data-registro-id]')?.dataset.registroId);
+        if (item) {
+            cerrarHistorialRegistros();
+            if (item.tipo === 'ganancia_semanal') editarGananciaSemanal(item.id);
+            else cargarParaEditar(item.id);
+        }
+    }
+    if (eliminarRegistroOtro) {
+        const id = eliminarRegistroOtro.closest('[data-registro-id]')?.dataset.registroId;
+        if (id) {
+            cerrarHistorialRegistros();
+            eliminarRegistro(id);
+        }
+    }
+    if (editarGasto) editarGastoMio(editarGasto.dataset.gastoEditar, listaOtrosMovimientos);
+    if (eliminarGasto) eliminarGastoMio(eliminarGasto.dataset.gastoEliminar);
+    if (editarEfectivo) { cerrarHistorialRegistros(); abrirModalRetiroEfectivo(); editarRetiroEfectivo(editarEfectivo.dataset.retiroEfectivoEditar); }
+    if (eliminarEfectivo) { cerrarHistorialRegistros(); eliminarRetiroEfectivo(eliminarEfectivo.dataset.retiroEfectivoEliminar); }
+    if (editarTarjeta) editarRetiroTarjetaDesdeHistorial(editarTarjeta.dataset.retiroTarjetaEditar);
+    if (eliminarTarjeta) eliminarRetiroTarjetaDesdeHistorial(eliminarTarjeta.dataset.retiroTarjetaEliminar);
+});
+
+listaHistorialGrupo.addEventListener('click', event => {
+    const editarRegistro = event.target.closest('.btn-editar-otro-registro');
+    const eliminarRegistroOtro = event.target.closest('.btn-eliminar-otro-registro');
+    const editarGasto = event.target.closest('[data-gasto-editar]');
+    const eliminarGasto = event.target.closest('[data-gasto-eliminar]');
+    const editarEfectivo = event.target.closest('[data-retiro-efectivo-editar]');
+    const eliminarEfectivo = event.target.closest('[data-retiro-efectivo-eliminar]');
+    const editarTarjeta = event.target.closest('[data-retiro-tarjeta-editar]');
+    const eliminarTarjeta = event.target.closest('[data-retiro-tarjeta-eliminar]');
+    if (editarRegistro) {
+        const id = editarRegistro.closest('[data-registro-id]')?.dataset.registroId;
+        const item = [...registros, ...gananciasSemanales].find(registro => registro.id === id);
+        if (item) { cerrarHistorialGrupo(); item.tipo === 'ganancia_semanal' ? editarGananciaSemanal(item.id) : cargarParaEditar(item.id); }
+    }
+    if (eliminarRegistroOtro) {
+        const id = eliminarRegistroOtro.closest('[data-registro-id]')?.dataset.registroId;
+        if (id) { cerrarHistorialGrupo(); eliminarRegistro(id); }
+    }
+    if (editarGasto) editarGastoMio(editarGasto.dataset.gastoEditar, listaHistorialGrupo);
+    if (eliminarGasto) eliminarGastoMio(eliminarGasto.dataset.gastoEliminar);
+    if (editarEfectivo) { cerrarHistorialGrupo(); abrirModalRetiroEfectivo(); editarRetiroEfectivo(editarEfectivo.dataset.retiroEfectivoEditar); }
+    if (eliminarEfectivo) { cerrarHistorialGrupo(); eliminarRetiroEfectivo(eliminarEfectivo.dataset.retiroEfectivoEliminar); }
+    if (editarTarjeta) { cerrarHistorialGrupo(); editarRetiroTarjetaDesdeHistorial(editarTarjeta.dataset.retiroTarjetaEditar); }
+    if (eliminarTarjeta) { cerrarHistorialGrupo(); eliminarRetiroTarjetaDesdeHistorial(eliminarTarjeta.dataset.retiroTarjetaEliminar); }
 });
 
 function obtenerTotalAbonado(deuda) {
@@ -1146,7 +1675,7 @@ function renderAbonosDeuda(deuda, limite = 3, contenedor = listaAbonosDeuda) {
         ? '<p class="historial-vacio">Todavía no hay abonos registrados.</p>'
         : abonosVisibles.map(abono => `
             <div class="abono-item">
-                <div><strong>$${Number(abono.monto).toFixed(2)}</strong><span>${abono.descripcion || 'Abono'} · ${new Date(abono.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
+                <div><strong>$${Number(abono.monto).toFixed(2)} ${etiquetaModificacion(abono)}</strong><span>${abono.descripcion || 'Abono'} · ${new Date(abono.fechaHora).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' })}</span></div>
                 <div class="abono-item-final"><span class="abono-metodo">${abono.metodoNombre || 'Sin asignar'}</span><div class="abono-acciones"><button type="button" class="btn-abono-metodo" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Cambiar método de pago"><i class="fa-solid fa-wallet"></i></button><button type="button" class="btn-abono-editar" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Editar abono"><i class="fa-solid fa-pen"></i></button><button type="button" class="btn-abono-eliminar" data-deuda-id="${deuda.id}" data-abono-id="${abono.id}" title="Eliminar abono"><i class="fa-solid fa-xmark"></i></button></div></div>
             </div>`).join('');
 }
@@ -1157,9 +1686,13 @@ function actualizarResumenAbono(deuda) {
     abonoTotalFalta.textContent = `$${obtenerSaldoDeuda(deuda).toFixed(2)}`;
 }
 
-function abrirModalAbonoDeuda(id) {
+function abrirModalAbonoDeuda(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirModalAbonoDeuda(id, true));
+        return;
+    }
     const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
-    if (!deuda || deuda.estado === 'pagado') return;
+    if (!deuda || obtenerSaldoDeuda(deuda) <= 0.009) return;
     deuda.abonos = Array.isArray(deuda.abonos) ? deuda.abonos : [];
     deudaEnAbono = deuda;
     deudaHistorialAbonos = deuda;
@@ -1198,10 +1731,17 @@ async function continuarAbonoDeuda() {
         return;
     }
     if (abonoEnEdicion) {
+        if (!ajustarSaldoTarjetaPorAbono(abonoEnEdicion, monto, abonoEnEdicion.metodo)) {
+            mensajeAbonoInvalido.textContent = 'La tarjeta seleccionada no tiene saldo suficiente para este abono.';
+            mensajeAbonoInvalido.hidden = false;
+            return;
+        }
         abonoEnEdicion.monto = monto;
         abonoEnEdicion.descripcion = inputDescripcionAbono.value.trim() || 'Abono';
+        actualizarEstadoEdicionRegistro(abonoEnEdicion, abonoEnEdicion.metodo);
         deudaEnAbono.estado = obtenerSaldoDeuda(deudaEnAbono) <= 0.009 ? 'pagado' : 'pendiente';
         await guardarRegistroEnSupabase(deudaEnAbono);
+        await guardarTarjetas();
         guardarYActualizar();
         cerrarModalAbonoDeuda();
         return;
@@ -1215,7 +1755,11 @@ async function continuarAbonoDeuda() {
     mostrarModalSeleccionarTarjeta();
 }
 
-function abrirHistorialAbonos() {
+function abrirHistorialAbonos(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialAbonos(true));
+        return;
+    }
     if (!deudaHistorialAbonos) return;
     renderAbonosDeuda(deudaHistorialAbonos, 0, listaHistorialAbonosCompleto);
     modalHistorialAbonos.hidden = false;
@@ -1227,7 +1771,11 @@ function cerrarHistorialAbonos() {
     modalHistorialAbonos.style.display = 'none';
 }
 
-function editarAbonoDeuda(deudaId, abonoId) {
+function editarAbonoDeuda(deudaId, abonoId, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => editarAbonoDeuda(deudaId, abonoId, true));
+        return;
+    }
     const deuda = registros.find(registro => registro.id === deudaId);
     const abono = deuda?.abonos?.find(item => item.id === abonoId);
     if (!deuda || !abono) return;
@@ -1254,7 +1802,24 @@ function cambiarMetodoAbono(deudaId, abonoId) {
     mostrarModalSeleccionarTarjeta();
 }
 
-async function eliminarAbonoDeuda(deudaId, abonoId) {
+function ajustarSaldoTarjetaPorAbono(abono, montoNuevo, metodoNuevo = abono.metodo) {
+    const montoAnterior = Number(abono.monto) || 0;
+    const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === abono.metodo);
+    const tarjetaNueva = tarjetas.find(tarjeta => tarjeta.id === metodoNuevo);
+
+    if (tarjetaNueva && tarjetaNueva.id !== (tarjetaAnterior && tarjetaAnterior.id) && tarjetaNueva.monto < montoNuevo) {
+        return false;
+    }
+    if (tarjetaAnterior) tarjetaAnterior.monto += montoAnterior;
+    if (tarjetaNueva) tarjetaNueva.monto -= montoNuevo;
+    return true;
+}
+
+async function eliminarAbonoDeuda(deudaId, abonoId, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarAbonoDeuda(deudaId, abonoId, true));
+        return;
+    }
     const deuda = registros.find(registro => registro.id === deudaId);
     if (!deuda || !Array.isArray(deuda.abonos)) return;
     if (!window.confirm('¿Eliminar este abono? El saldo pendiente volverá a aumentar.')) return;
@@ -1272,7 +1837,7 @@ async function eliminarAbonoDeuda(deudaId, abonoId) {
 btnCerrarAbonoDeuda.addEventListener('click', cerrarModalAbonoDeuda);
 btnCancelarAbonoDeuda.addEventListener('click', cerrarModalAbonoDeuda);
 btnContinuarAbonoDeuda.addEventListener('click', continuarAbonoDeuda);
-btnVerHistorialAbonos.addEventListener('click', abrirHistorialAbonos);
+btnVerHistorialAbonos.addEventListener('click', () => abrirHistorialAbonos());
 btnCerrarHistorialAbonos.addEventListener('click', cerrarHistorialAbonos);
 listaAbonosDeuda.addEventListener('click', event => {
     const editar = event.target.closest('[data-abono-id]');
@@ -1438,9 +2003,8 @@ async function confirmarGuardarCobro() {
     }
     const tarjetaDestino = tarjetas.find(tarjeta => tarjeta.id === tarjetaSeleccionadaPendiente);
     if (esCambioMetodoAbono) {
-        const metodoAnterior = abonoEnCambioMetodo.metodo;
         const montoCambio = Number(abonoEnCambioMetodo.monto) || 0;
-        const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === metodoAnterior);
+        const tarjetaAnterior = tarjetas.find(tarjeta => tarjeta.id === abonoEnCambioMetodo.metodo);
         if (tarjetaDestino && tarjetaDestino.id !== (tarjetaAnterior && tarjetaAnterior.id) && tarjetaDestino.monto < montoCambio) {
             detalleSaldoInsuficiente.textContent = `La tarjeta tiene $${tarjetaDestino.monto.toFixed(2)} disponibles y necesitas $${montoCambio.toFixed(2)} para este abono.`;
             mensajeSaldoInsuficiente.hidden = false;
@@ -1449,6 +2013,7 @@ async function confirmarGuardarCobro() {
         if (tarjetaAnterior && tarjetaAnterior.id !== (tarjetaDestino && tarjetaDestino.id)) tarjetaAnterior.monto += montoCambio;
         if (tarjetaDestino && tarjetaDestino.id !== (tarjetaAnterior && tarjetaAnterior.id)) tarjetaDestino.monto -= montoCambio;
         abonoEnCambioMetodo.metodo = tarjetaSeleccionadaPendiente;
+        actualizarEstadoEdicionRegistro(abonoEnCambioMetodo, tarjetaSeleccionadaPendiente);
         abonoEnCambioMetodo.metodoNombre = tarjetaSeleccionadaPendiente === 'efectivo'
             ? 'Efectivo'
             : tarjetaDestino?.nombre || (tarjetaSeleccionadaPendiente === 'sin_asignar' ? 'Sin asignar' : 'Tarjeta');
@@ -1606,7 +2171,7 @@ async function confirmarGuardarCobro() {
 
 
 // Event listeners para tarjetas
-btnAgregarTarjeta.addEventListener('click', abrirModalAgregarTarjeta);
+btnAgregarTarjeta.addEventListener('click', () => abrirModalAgregarTarjeta());
 
 // Cerrar modal al hacer click fuera
 modalAgregarTarjeta.addEventListener('click', function(e) {
@@ -1644,16 +2209,28 @@ modalSeleccionarTarjeta.addEventListener('click', function(e) {
 // Ajustar los campos obligatorios según el tipo de movimiento.
 function actualizarCamposFormulario() {
     const esRetiroEfectivo = tipoInput.value === 'retiro_efectivo';
+    const esRetiroTarjeta = tipoInput.value === 'retiro_tarjeta';
+    const esGastoMio = tipoInput.value === 'gasto_mio';
     limpiarAvisosSaldoRetiro();
     grupoTipo.hidden = false;
-    grupoTarjeta.style.display = tipoInput.value === 'cobrado' ? 'block' : 'none';
-    grupoCliente.hidden = esRetiroEfectivo;
-    grupoCliente.style.display = esRetiroEfectivo ? 'none' : '';
-    grupoFecha.hidden = esRetiroEfectivo;
-    grupoFecha.style.display = esRetiroEfectivo ? 'none' : '';
-    clienteInput.required = !esRetiroEfectivo;
-    fechaHoraInput.required = !esRetiroEfectivo;
-    descripcionInput.required = esRetiroEfectivo;
+    grupoTarjeta.style.display = tipoInput.value === 'cobrado' || esRetiroTarjeta ? 'block' : 'none';
+    grupoTarjeta.hidden = tipoInput.value !== 'cobrado' && !esRetiroTarjeta;
+    grupoTarjeta.querySelector('label').textContent = esRetiroTarjeta
+        ? '¿De qué tarjeta quieres retirar?'
+        : 'Enviar a Tarjeta (para cobros)';
+    grupoCliente.hidden = esRetiroEfectivo || esRetiroTarjeta;
+    grupoCliente.style.display = esRetiroEfectivo || esRetiroTarjeta || esGastoMio ? 'none' : '';
+    grupoFecha.hidden = false;
+    grupoFecha.style.display = '';
+    clienteInput.required = !esRetiroEfectivo && !esRetiroTarjeta && !esGastoMio;
+    fechaHoraInput.required = true;
+    descripcionInput.required = esRetiroEfectivo || esGastoMio;
+    descripcionInput.closest('.form-group').hidden = esRetiroTarjeta;
+    descripcionInput.closest('.form-group').style.display = esRetiroTarjeta ? 'none' : '';
+    tarjetaDestinoSelect.required = esRetiroTarjeta;
+    grupoFuenteGasto.hidden = !esGastoMio;
+    grupoFuenteGasto.style.display = esGastoMio ? '' : 'none';
+    fuenteGastoSelect.required = esGastoMio;
 }
 
 tipoInput.addEventListener('change', actualizarCamposFormulario);
@@ -1810,7 +2387,11 @@ window.cerrarModalGanancia = function() {
     iconoGuardarGanancia.className = 'fa-solid fa-check';
 }
 
-window.guardarGananciaSemanal = async function() {
+window.guardarGananciaSemanal = async function(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.guardarGananciaSemanal(true));
+        return;
+    }
     const monto = convertirMonto(document.getElementById('input-monto-ganancia').value);
     const descripcion = document.getElementById('input-descripcion-ganancia').value.trim();
     const estado = document.getElementById('input-estado-ganancia').value;
@@ -1879,6 +2460,11 @@ window.guardarGananciaSemanal = async function() {
     };
 
     if (gananciaEnEdicion) {
+        nuevaGanancia.baseEdicionRegistro = gananciaEnEdicion.baseEdicionRegistro;
+        actualizarEstadoEdicionRegistro(nuevaGanancia);
+    }
+
+    if (gananciaEnEdicion) {
         const indice = gananciasSemanales.findIndex(ganancia => ganancia.id === gananciaEnEdicion.id);
         if (indice !== -1) {
             await guardarRegistroEnSupabase(nuevaGanancia);
@@ -1918,8 +2504,7 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
     
     contenedor.innerHTML = '';
     
-    const movimientosEnCalendario = [...registros, ...retirosEfectivo].filter(registro => registro.enCalendario);
-    const elementosCalendario = [...gananciasSemanales, ...movimientosEnCalendario]
+    const elementosCalendario = [...gananciasSemanales]
         .sort((a, b) => new Date(b.fechaHora) - new Date(a.fechaHora));
 
     if (elementosCalendario.length === 0) {
@@ -2052,7 +2637,196 @@ function renderGananciasSemanales(mostrarTodos = false, contenedor = tablaGananc
     });
 }
 
-window.abrirEditarDestinoCalendario = function(id, esMovimiento) {
+function claveFechaRegistro(fechaHora) {
+    return String(fechaHora || '').slice(0, 10);
+}
+
+function obtenerTodosLosMovimientosParaCalendario() {
+    const movimientos = [
+        ...registros,
+        ...gananciasSemanales,
+        ...retirosEfectivo,
+        ...gastosMios,
+        ...obtenerRetirosTarjetas().map(retiro => ({
+            ...retiro,
+            tipo: 'retiro_tarjeta',
+            cliente: retiro.tarjetaNombre || 'Retiro por tarjeta'
+        }))
+    ];
+    return movimientos.filter(item => item.fechaHora && !item.ocultoCalendario);
+}
+
+function nombreTipoMovimientoCalendario(item) {
+    const nombres = {
+        cobrado: 'Cobro realizado',
+        pendiente: 'Cobro pendiente',
+        prestado: 'Dinero prestado',
+        recibido: 'Dinero recibido',
+        deuda: 'Deuda',
+        ganancia_semanal: 'Día de trabajo',
+        retiro_efectivo: 'Retiro en efectivo',
+        retiro_tarjeta: 'Retiro por tarjeta',
+        gasto_mio: 'Gasto mío'
+    };
+    return nombres[item.tipo] || 'Movimiento';
+}
+
+function obtenerMontoVisualCalendario(item) {
+    return Number.isFinite(Number(item.montoVisualCalendario)) ? Number(item.montoVisualCalendario) : Number(item.monto) || 0;
+}
+
+function obtenerOrigenVisualCalendario(item) {
+    if (item.origenVisualCalendario) return item.origenVisualCalendario;
+    if (item.origenEfectivo || item.destinoEfectivo) return 'Efectivo';
+    if (item.origenTarjetaNombre || item.tarjetaDestinoNombre) return item.origenTarjetaNombre || item.tarjetaDestinoNombre;
+    if (item.tarjetaNombre) return item.tarjetaNombre;
+    return 'Sin origen asignado';
+}
+
+function obtenerBaseEdicionCalendario(item) {
+    if (!item.baseEdicionCalendario) {
+        item.baseEdicionCalendario = {
+            monto: Number(item.monto) || 0,
+            origen: item.origenEfectivo || item.destinoEfectivo
+                ? 'Efectivo'
+                : item.origenTarjetaNombre || item.tarjetaDestinoNombre || item.tarjetaNombre || 'Sin origen asignado',
+            descripcion: item.descripcion || item.cliente || '',
+            fechaHora: item.fechaHora || ''
+        };
+    }
+    return item.baseEdicionCalendario;
+}
+
+function rellenarOrigenVisualCalendario(item) {
+    const origenActual = item.origenVisualCalendario || (item.origenEfectivo || item.destinoEfectivo ? 'efectivo' : item.origenTarjetaId || item.tarjetaDestinoId || item.tarjetaId || '');
+    selectOrigenCalendarioVisual.innerHTML = '<option value="">Sin origen asignado</option><option value="efectivo">Efectivo</option>';
+    tarjetas.forEach(tarjeta => {
+        const option = document.createElement('option');
+        option.value = tarjeta.id;
+        option.textContent = tarjeta.nombre;
+        selectOrigenCalendarioVisual.appendChild(option);
+    });
+    selectOrigenCalendarioVisual.value = Array.from(selectOrigenCalendarioVisual.options).some(option => option.value === origenActual) ? origenActual : '';
+}
+
+function solicitarSeguridadCalendario(accion) {
+    accionSeguridadCalendario = accion;
+    formSeguridadCalendario.reset();
+    mensajeSeguridadCalendario.textContent = '';
+    modalSeguridadCalendario.hidden = false;
+    modalSeguridadCalendario.style.display = 'flex';
+    contrasenaCalendarioInput.focus();
+}
+
+function solicitarSeguridadEliminacion(accion) {
+    solicitarSeguridadCalendario(accion);
+}
+
+function buscarMovimientoCalendario(tipo, id) {
+    if (tipo === 'retiro_tarjeta') return obtenerRetirosTarjetas().find(item => item.id === id);
+    const colecciones = {
+        retiro_efectivo: retirosEfectivo,
+        gasto_mio: gastosMios,
+        ganancia_semanal: gananciasSemanales,
+        registro: registros
+    };
+    return colecciones[tipo]?.find(item => item.id === id);
+}
+
+function abrirEdicionDesdeCalendario(tipo, id) {
+    const item = buscarMovimientoCalendario(tipo, id);
+    if (!item) return;
+    movimientoCalendarioEnEdicion = { tipo, id, item };
+    solicitarSeguridadCalendario(() => {
+        inputMontoCalendarioVisual.value = obtenerMontoVisualCalendario(item).toFixed(2);
+        rellenarOrigenVisualCalendario(item);
+        inputDescripcionCalendarioVisual.value = item.descripcion || item.cliente || '';
+        inputFechaCalendarioVisual.value = item.fechaHora || obtenerFechaHoraLocal();
+        modalEditarCalendarioVisual.hidden = false;
+        modalEditarCalendarioVisual.style.display = 'flex';
+        inputDescripcionCalendarioVisual.focus();
+    });
+}
+
+function eliminarDesdeCalendario(tipo, id) {
+    const item = buscarMovimientoCalendario(tipo, id);
+    if (!item) return;
+    solicitarSeguridadCalendario(async () => {
+        const real = tipo === 'retiro_tarjeta'
+            ? tarjetas.find(tarjeta => tarjeta.id === item.tarjetaId)?.retiros?.find(retiro => retiro.id === id)
+            : item;
+        if (!real) return;
+        real.ocultoCalendario = true;
+        if (tipo === 'retiro_tarjeta') await guardarTarjetas();
+        else {
+            await guardarRegistroEnSupabase(real);
+            guardarYActualizar();
+        }
+        mostrarDetalleDiaRegistros(claveFechaRegistro(real.fechaHora));
+        renderCalendarioRegistros();
+    });
+}
+
+function mostrarDetalleDiaRegistros(fechaClave) {
+    const movimientos = obtenerTodosLosMovimientosParaCalendario().filter(item => claveFechaRegistro(item.fechaHora) === fechaClave);
+    const [anio, mes, dia] = fechaClave.split('-').map(Number);
+    const fecha = new Date(anio, mes - 1, dia);
+    const fechaTexto = fecha.toLocaleDateString('es-EC', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    if (movimientos.length === 0) {
+        detalleDiaRegistros.innerHTML = `<h3><i class="fa-solid fa-calendar-xmark"></i> ${fechaTexto}</h3><p class="dia-sin-registros">Día sin registro.</p>`;
+        return;
+    }
+    detalleDiaRegistros.innerHTML = `<h3><i class="fa-solid fa-list-check"></i> Registros del ${fechaTexto}</h3><div class="detalle-dia-lista">${ordenarPorFecha(movimientos).map(item => {
+        const tipo = ['ganancia_semanal', 'retiro_efectivo', 'retiro_tarjeta', 'gasto_mio'].includes(item.tipo) ? item.tipo : 'registro';
+        const id = escaparHtml(item.id);
+        const estaModificado = Boolean(item.modificadoCalendario || item.modificadoRegistro);
+        const montoVisual = obtenerMontoVisualCalendario(item);
+        const origenVisual = obtenerOrigenVisualCalendario(item);
+        return `<article class="detalle-dia-item"><div><strong>${escaparHtml(item.descripcion || item.cliente || nombreTipoMovimientoCalendario(item))}</strong><span>${nombreTipoMovimientoCalendario(item)} · ${new Date(item.fechaHora).toLocaleTimeString('es-EC', { hour: '2-digit', minute: '2-digit' })} · ${escaparHtml(origenVisual)}</span></div><div class="detalle-dia-monto"><b>$${montoVisual.toFixed(2)}</b><small class="${estaModificado ? 'registro-modificado' : 'registro-original'}">${estaModificado ? 'Modificado' : 'Original'}</small></div><div class="detalle-dia-acciones"><button type="button" class="btn-calendario-editar" data-calendario-editar="${id}" data-calendario-tipo="${tipo}" title="Editar registro" aria-label="Editar registro"><i class="fa-solid fa-pen"></i></button><button type="button" class="btn-calendario-eliminar" data-calendario-eliminar="${id}" data-calendario-tipo="${tipo}" title="Eliminar registro" aria-label="Eliminar registro"><i class="fa-solid fa-trash"></i></button></div></article>`;
+    }).join('')}</div>`;
+}
+
+function renderCalendarioRegistros() {
+    const anio = mesCalendarioActual.getFullYear();
+    const mes = mesCalendarioActual.getMonth();
+    const primerDia = new Date(anio, mes, 1);
+    const diasMes = new Date(anio, mes + 1, 0).getDate();
+    const inicioSemana = primerDia.getDay();
+    const movimientos = obtenerTodosLosMovimientosParaCalendario();
+    const fechasConRegistro = new Set(movimientos.map(item => claveFechaRegistro(item.fechaHora)));
+    const nombresMeses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    mesCalendarioRegistros.textContent = `${nombresMeses[mes].charAt(0).toUpperCase() + nombresMeses[mes].slice(1)} ${anio}`;
+    calendarioRegistrosGrid.innerHTML = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(dia => `<div class="calendario-dia-semana">${dia}</div>`).join('');
+    for (let indice = 0; indice < inicioSemana; indice += 1) calendarioRegistrosGrid.insertAdjacentHTML('beforeend', '<div class="calendario-dia calendario-dia-vacio"></div>');
+    for (let dia = 1; dia <= diasMes; dia += 1) {
+        const clave = `${anio}-${String(mes + 1).padStart(2, '0')}-${String(dia).padStart(2, '0')}`;
+        const tieneRegistro = fechasConRegistro.has(clave);
+        calendarioRegistrosGrid.insertAdjacentHTML('beforeend', `<button type="button" class="calendario-dia ${tieneRegistro ? 'con-registro' : ''}" data-fecha-calendario="${clave}"><span>${dia}</span>${tieneRegistro ? '<i class="calendario-punto"></i>' : ''}</button>`);
+    }
+}
+
+function abrirCalendarioRegistros(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirCalendarioRegistros(true));
+        return;
+    }
+    mesCalendarioActual = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderCalendarioRegistros();
+    detalleDiaRegistros.innerHTML = '<h3><i class="fa-solid fa-hand-pointer"></i> Selecciona un día</h3>';
+    modalCalendarioRegistros.hidden = false;
+    modalCalendarioRegistros.style.display = 'flex';
+}
+
+function cerrarCalendarioRegistros() {
+    modalCalendarioRegistros.hidden = true;
+    modalCalendarioRegistros.style.display = 'none';
+}
+
+window.abrirEditarDestinoCalendario = function(id, esMovimiento, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.abrirEditarDestinoCalendario(id, esMovimiento, true));
+        return;
+    }
     const elemento = esMovimiento
         ? [...registros, ...retirosEfectivo].find(registro => registro.id === id)
         : gananciasSemanales.find(ganancia => ganancia.id === id);
@@ -2127,6 +2901,7 @@ window.guardarCorreccionCalendario = async function() {
     }
 
     elementoCalendarioEnEdicion.monto = montoNuevo;
+    actualizarEstadoEdicionRegistro(elementoCalendarioEnEdicion);
     if (usaOrigenTarjeta) {
         elementoCalendarioEnEdicion.origenTarjetaId = tarjetaNueva ? tarjetaNueva.id : null;
         elementoCalendarioEnEdicion.origenTarjetaNombre = tarjetaNueva ? tarjetaNueva.nombre : '';
@@ -2154,7 +2929,11 @@ window.marcarGananciaComoPagada = function(id) {
 }
 
 
-window.eliminarGananciaSemanal = async function(id) {
+window.eliminarGananciaSemanal = async function(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => window.eliminarGananciaSemanal(id, true));
+        return;
+    }
     const ganancia = gananciasSemanales.find(item => item.id === id);
     if (!ganancia) return;
 
@@ -2170,13 +2949,17 @@ window.eliminarGananciaSemanal = async function(id) {
 
 btnAgregarGananciaSemanal.addEventListener('click', abrirModalGanancia);
 
-btnVerHistorialRetiros.addEventListener('click', abrirHistorialRetiros);
+btnVerHistorialRetiros.addEventListener('click', () => abrirHistorialRetiros());
 btnCerrarHistorialRetiros.addEventListener('click', cerrarHistorialRetiros);
 modalHistorialRetiros.addEventListener('click', function(e) {
     if (e.target === modalHistorialRetiros) cerrarHistorialRetiros();
 });
 
-function abrirHistorialCalendario() {
+function abrirHistorialCalendario(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialCalendario(true));
+        return;
+    }
     renderGananciasSemanales(true, listaHistorialCalendarioCompleto);
     modalHistorialCalendario.hidden = false;
     modalHistorialCalendario.style.display = 'flex';
@@ -2187,10 +2970,98 @@ function cerrarHistorialCalendario() {
     modalHistorialCalendario.style.display = 'none';
 }
 
-btnVerHistorialCalendario.addEventListener('click', abrirHistorialCalendario);
+btnVerHistorialCalendario.addEventListener('click', () => abrirHistorialCalendario());
 btnCerrarHistorialCalendario.addEventListener('click', cerrarHistorialCalendario);
 modalHistorialCalendario.addEventListener('click', function(e) {
     if (e.target === modalHistorialCalendario) cerrarHistorialCalendario();
+});
+btnVerCalendarioRegistros.addEventListener('click', () => abrirCalendarioRegistros());
+btnCerrarCalendarioRegistros.addEventListener('click', cerrarCalendarioRegistros);
+btnMesAnterior.addEventListener('click', () => {
+    mesCalendarioActual = new Date(mesCalendarioActual.getFullYear(), mesCalendarioActual.getMonth() - 1, 1);
+    renderCalendarioRegistros();
+});
+btnMesSiguiente.addEventListener('click', () => {
+    mesCalendarioActual = new Date(mesCalendarioActual.getFullYear(), mesCalendarioActual.getMonth() + 1, 1);
+    renderCalendarioRegistros();
+});
+calendarioRegistrosGrid.addEventListener('click', event => {
+    const dia = event.target.closest('[data-fecha-calendario]');
+    if (dia) mostrarDetalleDiaRegistros(dia.dataset.fechaCalendario);
+});
+detalleDiaRegistros.addEventListener('click', event => {
+    const editar = event.target.closest('[data-calendario-editar]');
+    const eliminar = event.target.closest('[data-calendario-eliminar]');
+    if (editar) abrirEdicionDesdeCalendario(editar.dataset.calendarioTipo, editar.dataset.calendarioEditar);
+    if (eliminar) eliminarDesdeCalendario(eliminar.dataset.calendarioTipo, eliminar.dataset.calendarioEliminar);
+});
+modalCalendarioRegistros.addEventListener('click', event => {
+    if (event.target === modalCalendarioRegistros) cerrarCalendarioRegistros();
+});
+formSeguridadCalendario.addEventListener('submit', async event => {
+    event.preventDefault();
+    if (contrasenaCalendarioInput.value !== contrasenaActual) {
+        mensajeSeguridadCalendario.textContent = 'La contraseña no coincide con la contraseña actual.';
+        contrasenaCalendarioInput.select();
+        return;
+    }
+    const accion = accionSeguridadCalendario;
+    accionSeguridadCalendario = null;
+    modalSeguridadCalendario.hidden = true;
+    modalSeguridadCalendario.style.display = 'none';
+    if (accion) await accion();
+});
+btnCancelarSeguridadCalendario.addEventListener('click', () => {
+    accionSeguridadCalendario = null;
+    modalSeguridadCalendario.hidden = true;
+    modalSeguridadCalendario.style.display = 'none';
+});
+btnCerrarEditarCalendarioVisual.addEventListener('click', () => {
+    movimientoCalendarioEnEdicion = null;
+    modalEditarCalendarioVisual.hidden = true;
+    modalEditarCalendarioVisual.style.display = 'none';
+});
+btnCancelarEditarCalendarioVisual.addEventListener('click', () => btnCerrarEditarCalendarioVisual.click());
+btnGuardarEditarCalendarioVisual.addEventListener('click', async () => {
+    const movimiento = movimientoCalendarioEnEdicion;
+    const descripcion = inputDescripcionCalendarioVisual.value.trim();
+    const fechaHora = inputFechaCalendarioVisual.value;
+    const montoVisual = Number(inputMontoCalendarioVisual.value);
+    const origenVisual = selectOrigenCalendarioVisual.value;
+    const origenNombreVisual = origenVisual === 'efectivo'
+        ? 'Efectivo'
+        : tarjetas.find(tarjeta => tarjeta.id === origenVisual)?.nombre || 'Sin origen asignado';
+    if (!movimiento || !descripcion || !fechaHora || !Number.isFinite(montoVisual) || montoVisual < 0) return;
+    const item = movimiento.tipo === 'retiro_tarjeta'
+        ? tarjetas.find(tarjeta => tarjeta.id === movimiento.item.tarjetaId)?.retiros?.find(retiro => retiro.id === movimiento.id)
+        : movimiento.item;
+    if (!item) return;
+    const baseEdicion = obtenerBaseEdicionCalendario(item);
+    const huboCambio = montoVisual !== Number(baseEdicion.monto)
+        || origenNombreVisual !== baseEdicion.origen
+        || descripcion !== baseEdicion.descripcion
+        || fechaHora !== baseEdicion.fechaHora;
+    item.montoVisualCalendario = montoVisual;
+    item.origenVisualCalendario = origenNombreVisual;
+    item.descripcion = descripcion;
+    item.fechaHora = fechaHora;
+    item.modificadoCalendario = huboCambio;
+    if (movimiento.tipo === 'retiro_tarjeta') await guardarTarjetas();
+    else {
+        await guardarRegistroEnSupabase(item);
+        guardarYActualizar();
+    }
+    modalEditarCalendarioVisual.hidden = true;
+    modalEditarCalendarioVisual.style.display = 'none';
+    movimientoCalendarioEnEdicion = null;
+    mostrarDetalleDiaRegistros(claveFechaRegistro(fechaHora));
+    renderCalendarioRegistros();
+});
+modalSeguridadCalendario.addEventListener('click', event => {
+    if (event.target === modalSeguridadCalendario) btnCancelarSeguridadCalendario.click();
+});
+modalEditarCalendarioVisual.addEventListener('click', event => {
+    if (event.target === modalEditarCalendarioVisual) btnCerrarEditarCalendarioVisual.click();
 });
 
 // Cerrar modal ganancia al hacer click fuera
@@ -2216,9 +3087,89 @@ modalEditarDestinoCalendario.addEventListener('click', function(e) {
     }
 });
 
+function obtenerSaldoOrigenGasto(origen, gastoExcluido = null) {
+    if (origen === 'efectivo') {
+        return calcularEfectivoDisponible() + (gastoExcluido?.origenEfectivo ? Number(gastoExcluido.monto) || 0 : 0);
+    }
+    const tarjeta = tarjetas.find(item => item.id === origen);
+    const saldo = tarjeta ? Number(tarjeta.monto) || 0 : 0;
+    return saldo + (gastoExcluido?.origenTarjetaId === origen ? Number(gastoExcluido.monto) || 0 : 0);
+}
+
+function devolverMontoGastoAlOrigen(gasto) {
+    if (gasto.origenTarjetaId) {
+        const tarjeta = tarjetas.find(item => item.id === gasto.origenTarjetaId);
+        if (tarjeta) tarjeta.monto += Number(gasto.monto) || 0;
+    }
+}
+
+function descontarMontoGastoDelOrigen(gasto) {
+    if (gasto.origenTarjetaId) {
+        const tarjeta = tarjetas.find(item => item.id === gasto.origenTarjetaId);
+        if (tarjeta) tarjeta.monto -= Number(gasto.monto) || 0;
+    }
+}
+
+async function guardarGastoMioDesdeFormulario(id) {
+    const monto = Number(montoInput.value);
+    const descripcion = descripcionInput.value.trim();
+    const fechaHora = fechaHoraInput.value;
+    const origen = fuenteGastoSelect.value;
+    const gastoOriginal = id ? gastosMios.find(gasto => gasto.id === id) : null;
+
+    if (!Number.isFinite(monto) || monto <= 0 || !descripcion || !fechaHora || !origen) {
+        alert('Completa monto, fecha, descripción y origen del dinero.');
+        return false;
+    }
+    const saldoDisponible = obtenerSaldoOrigenGasto(origen, gastoOriginal);
+    if (monto > saldoDisponible) {
+        alert(`No hay suficiente dinero en el origen seleccionado. Disponible: $${saldoDisponible.toFixed(2)}.`);
+        return false;
+    }
+
+    if (gastoOriginal) devolverMontoGastoAlOrigen(gastoOriginal);
+    const gasto = gastoOriginal || {
+        id: '',
+        tipo: 'gasto_mio',
+        cliente: 'Gasto mío',
+        enCalendario: false,
+        estado: 'pagado'
+    };
+    gasto.monto = monto;
+    gasto.descripcion = descripcion;
+    gasto.fechaHora = fechaHora;
+    gasto.origenEfectivo = origen === 'efectivo';
+    gasto.origenTarjetaId = gasto.origenEfectivo ? null : origen;
+    gasto.origenTarjetaNombre = gasto.origenEfectivo ? 'Efectivo' : tarjetas.find(tarjeta => tarjeta.id === origen)?.nombre || '';
+    actualizarEstadoEdicionRegistro(gasto, origen);
+    descontarMontoGastoDelOrigen(gasto);
+
+    const nuevoId = await guardarRegistroEnSupabase(gasto);
+    if (!nuevoId) {
+        if (gastoOriginal) descontarMontoGastoDelOrigen(gastoOriginal);
+        return false;
+    }
+    gasto.id = nuevoId;
+    if (!gastoOriginal) gastosMios.unshift(gasto);
+    await guardarTarjetas();
+    guardarYActualizar();
+    resetFormulario();
+    return true;
+}
+
 
 form.addEventListener('submit', async function(e) {
     e.preventDefault();
+
+    if (form.dataset.autorizado !== 'true') {
+        if (!form.reportValidity()) return;
+        solicitarSeguridadCalendario(() => {
+            form.dataset.autorizado = 'true';
+            form.requestSubmit();
+        });
+        return;
+    }
+    delete form.dataset.autorizado;
 
     const id = registroIdInput.value;
     const tipo = tipoInput.value;
@@ -2241,8 +3192,15 @@ form.addEventListener('submit', async function(e) {
         destinoEfectivo: registroOriginal ? Boolean(registroOriginal.destinoEfectivo) : false,
         origenTarjetaId: registroOriginal ? registroOriginal.origenTarjetaId || null : null,
         origenTarjetaNombre: registroOriginal ? registroOriginal.origenTarjetaNombre || '' : '',
-        origenEfectivo: registroOriginal ? Boolean(registroOriginal.origenEfectivo) : false
+        origenEfectivo: registroOriginal ? Boolean(registroOriginal.origenEfectivo) : false,
+        modificadoRegistro: registroOriginal ? Boolean(registroOriginal.modificadoRegistro) : false,
+        baseEdicionRegistro: registroOriginal ? registroOriginal.baseEdicionRegistro : null
     };
+
+    if (tipo === 'gasto_mio') {
+        await guardarGastoMioDesdeFormulario(id);
+        return;
+    }
 
     if (tipo === 'retiro_efectivo' && !id) {
         limpiarAvisosSaldoRetiro();
@@ -2255,8 +3213,47 @@ form.addEventListener('submit', async function(e) {
         return;
     }
 
+    if (tipo === 'retiro_tarjeta' && !id) {
+        if (tarjetas.length === 0) {
+            alert('Primero agrega una tarjeta para poder retirar dinero.');
+            return;
+        }
+        const tarjetaRetiro = tarjetas.find(tarjeta => tarjeta.id === tarjetaDestinoSelect.value);
+        if (!tarjetaRetiro) {
+            alert('Selecciona la tarjeta de la que quieres retirar.');
+            tarjetaDestinoSelect.focus();
+            return;
+        }
+        abrirDetalleTarjeta(tarjetaRetiro.id);
+        selectTarjetaRetiro.value = tarjetaRetiro.id;
+        inputMontoRetiro.value = monto;
+        inputFechaHoraRetiro.value = fechaHora;
+        guardarRetiroTarjeta();
+        cerrarModalDetalleTarjeta();
+        resetFormulario();
+        return;
+    }
+
     // Los cobros eligen destino al registrarse; el préstamo elige origen al pagarse.
     if (tipo === 'cobrado' && !id) {
+        if (tarjetaDestinoSelect.value) {
+            nuevoRegistro.estado = 'pagado';
+            nuevoRegistro.destinoEfectivo = tarjetaDestinoSelect.value === 'efectivo';
+            const tarjetaDestino = tarjetas.find(tarjeta => tarjeta.id === tarjetaDestinoSelect.value);
+            nuevoRegistro.tarjetaDestinoId = tarjetaDestino ? tarjetaDestino.id : null;
+            nuevoRegistro.tarjetaDestinoNombre = tarjetaDestino ? tarjetaDestino.nombre : '';
+            const nuevoId = await guardarRegistroEnSupabase(nuevoRegistro);
+            if (!nuevoId) return;
+            nuevoRegistro.id = nuevoId;
+            registros.push(nuevoRegistro);
+            if (tarjetaDestino) {
+                tarjetaDestino.monto += monto;
+                await guardarTarjetas();
+            }
+            guardarYActualizar();
+            resetFormulario();
+            return;
+        }
         registroPendienteDeGuardar = nuevoRegistro;
         mostrarModalSeleccionarTarjeta();
         return;
@@ -2291,9 +3288,11 @@ form.addEventListener('submit', async function(e) {
 });
 
 async function guardarYActualizar() {
+    normalizarBasesEdicion();
     localStorage.setItem('registros_cobros', JSON.stringify(registros));
     localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
     localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+    localStorage.setItem('gastos_mios', JSON.stringify(gastosMios));
     actualizarInterfaz();
 }
 
@@ -2311,9 +3310,21 @@ function detallesParaSupabase(item) {
         const tarjetaDestino = item.tarjetaDestinoId ? ` [tarjeta:${encodeURIComponent(item.tarjetaDestinoId)}]` : '';
         const tarjetaNombre = item.tarjetaDestinoNombre ? ` [tarjetaNombre:${encodeURIComponent(item.tarjetaDestinoNombre)}]` : '';
         const efectivo = item.destinoEfectivo ? ' [efectivo:si]' : '';
-        return `${item.descripcion} [dias:${item.dias.join(',')}] [estado:${item.estado}]${descripciones}${tarjetaDestino}${tarjetaNombre}${efectivo} ${PREFIJO_TIPO}${item.tipo}]`;
+        const visual = item.modificadoCalendario ? ` [modificadoCalendario:si] [montoVisualCalendario:${Number(item.montoVisualCalendario || item.monto)}] [origenVisualCalendario:${encodeURIComponent(item.origenVisualCalendario || '')}]` : '';
+        const modificado = item.modificadoRegistro ? ' [modificadoRegistro:si]' : '';
+        const baseRegistro = item.baseEdicionRegistro ? ` [baseEdicionRegistro:${encodeURIComponent(JSON.stringify(item.baseEdicionRegistro))}]` : '';
+        const baseEdicion = item.baseEdicionCalendario ? ` [baseEdicionCalendario:${encodeURIComponent(JSON.stringify(item.baseEdicionCalendario))}]` : '';
+        const oculto = item.ocultoCalendario ? ' [ocultoCalendario:si]' : '';
+        return `${item.descripcion} [dias:${item.dias.join(',')}] [estado:${item.estado}]${descripciones}${tarjetaDestino}${tarjetaNombre}${efectivo}${visual}${modificado}${baseEdicion}${baseRegistro}${oculto} ${PREFIJO_TIPO}${item.tipo}]`;
     }
     const calendario = item.enCalendario ? ' [calendario:si]' : '';
+    const ocultoCalendario = item.ocultoCalendario ? ' [ocultoCalendario:si]' : '';
+    const modificadoCalendario = item.modificadoCalendario ? ' [modificadoCalendario:si]' : '';
+    const modificadoRegistro = item.modificadoRegistro ? ' [modificadoRegistro:si]' : '';
+    const montoVisualCalendario = Number.isFinite(Number(item.montoVisualCalendario)) ? ` [montoVisualCalendario:${Number(item.montoVisualCalendario)}]` : '';
+    const origenVisualCalendario = item.origenVisualCalendario ? ` [origenVisualCalendario:${encodeURIComponent(item.origenVisualCalendario)}]` : '';
+    const baseEdicion = item.baseEdicionCalendario ? ` [baseEdicionCalendario:${encodeURIComponent(JSON.stringify(item.baseEdicionCalendario))}]` : '';
+    const baseRegistro = item.baseEdicionRegistro ? ` [baseEdicionRegistro:${encodeURIComponent(JSON.stringify(item.baseEdicionRegistro))}]` : '';
     const tarjetaDestino = item.tarjetaDestinoId ? ` [tarjeta:${encodeURIComponent(item.tarjetaDestinoId)}]` : '';
     const tarjetaNombre = item.tarjetaDestinoNombre ? ` [tarjetaNombre:${encodeURIComponent(item.tarjetaDestinoNombre)}]` : '';
     const efectivo = item.destinoEfectivo ? ' [efectivo:si]' : '';
@@ -2324,15 +3335,15 @@ function detallesParaSupabase(item) {
         ? ` [abonos:${encodeURIComponent(JSON.stringify(item.abonos))}]`
         : '';
     const estadoRegistro = item.tipo === 'prestado' || item.tipo === 'deuda' || item.tipo === 'recibido' ? ` [estadoRegistro:${item.estado || 'pendiente'}]` : '';
-    return `${item.descripcion}${calendario}${tarjetaDestino}${tarjetaNombre}${efectivo}${origenTarjeta}${origenNombre}${origenEfectivo}${abonos}${estadoRegistro} ${PREFIJO_TIPO}${item.tipo}]`;
+    return `${item.descripcion}${calendario}${ocultoCalendario}${modificadoCalendario}${modificadoRegistro}${montoVisualCalendario}${origenVisualCalendario}${baseEdicion}${baseRegistro}${tarjetaDestino}${tarjetaNombre}${efectivo}${origenTarjeta}${origenNombre}${origenEfectivo}${abonos}${estadoRegistro} ${PREFIJO_TIPO}${item.tipo}]`;
 }
 
 function registroDesdeSupabase(item) {
     const detalles = item.detalles || 'Sin detalle';
-    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo)\]$/);
+    const tipoEncontrado = detalles.match(/\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo|gasto_mio)\]$/);
     const tipo = tipoEncontrado ? tipoEncontrado[1] : 'cobrado';
     
-    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo)\]$/, '').trim();
+    let descripcion = detalles.replace(/\s*\[tipo:(cobrado|pendiente|prestado|recibido|deuda|ganancia_semanal|retiro_efectivo|gasto_mio)\]$/, '').trim();
     let dias = [];
     let estado = tipo === 'prestado' || tipo === 'deuda' || tipo === 'recibido' ? 'pendiente' : 'pagado';
     const estadoRegistroMatch = detalles.match(/\[estadoRegistro:(pagado|pendiente)\]/);
@@ -2350,6 +3361,30 @@ function registroDesdeSupabase(item) {
     descripcion = descripcion.replace(/\s*\[efectivo:si\]/, '').trim();
     const enCalendario = /\[calendario:si\]/.test(descripcion);
     descripcion = descripcion.replace(/\s*\[calendario:si\]/, '').trim();
+    const ocultoCalendario = /\[ocultoCalendario:si\]/.test(descripcion);
+    descripcion = descripcion.replace(/\s*\[ocultoCalendario:si\]/, '').trim();
+    const modificadoCalendario = /\[modificadoCalendario:si\]/.test(descripcion);
+    descripcion = descripcion.replace(/\s*\[modificadoCalendario:si\]/, '').trim();
+    const modificadoRegistro = /\[modificadoRegistro:si\]/.test(descripcion);
+    descripcion = descripcion.replace(/\s*\[modificadoRegistro:si\]/, '').trim();
+    const montoVisualMatch = descripcion.match(/\[montoVisualCalendario:([^\]]+)\]/);
+    const montoVisualCalendario = montoVisualMatch ? Number(montoVisualMatch[1]) : null;
+    descripcion = descripcion.replace(/\s*\[montoVisualCalendario:[^\]]+\]/, '').trim();
+    const origenVisualMatch = descripcion.match(/\[origenVisualCalendario:([^\]]+)\]/);
+    const origenVisualCalendario = origenVisualMatch ? decodeURIComponent(origenVisualMatch[1]) : '';
+    descripcion = descripcion.replace(/\s*\[origenVisualCalendario:[^\]]+\]/, '').trim();
+    const baseEdicionMatch = descripcion.match(/\[baseEdicionCalendario:([^\]]+)\]/);
+    let baseEdicionCalendario = null;
+    if (baseEdicionMatch) {
+        try { baseEdicionCalendario = JSON.parse(decodeURIComponent(baseEdicionMatch[1])); } catch (error) { baseEdicionCalendario = null; }
+        descripcion = descripcion.replace(/\s*\[baseEdicionCalendario:[^\]]+\]/, '').trim();
+    }
+    const baseRegistroMatch = descripcion.match(/\[baseEdicionRegistro:([^\]]+)\]/);
+    let baseEdicionRegistro = null;
+    if (baseRegistroMatch) {
+        try { baseEdicionRegistro = JSON.parse(decodeURIComponent(baseRegistroMatch[1])); } catch (error) { baseEdicionRegistro = null; }
+        descripcion = descripcion.replace(/\s*\[baseEdicionRegistro:[^\]]+\]/, '').trim();
+    }
 
     const tarjetaMatchGeneral = descripcion.match(/\[tarjeta:([^\]]+)\]/);
     if (tarjetaMatchGeneral) {
@@ -2416,6 +3451,13 @@ function registroDesdeSupabase(item) {
         tarjetaDestinoId: tarjetaDestinoId,
         tarjetaDestinoNombre: tarjetaDestinoNombre,
         enCalendario: enCalendario,
+        ocultoCalendario: ocultoCalendario,
+        modificadoCalendario: modificadoCalendario,
+        modificadoRegistro: modificadoRegistro,
+        montoVisualCalendario: Number.isFinite(montoVisualCalendario) ? montoVisualCalendario : null,
+        origenVisualCalendario: origenVisualCalendario,
+        baseEdicionCalendario: baseEdicionCalendario,
+        baseEdicionRegistro: baseEdicionRegistro,
         destinoEfectivo: destinoEfectivo,
         origenTarjetaId: origenTarjetaId,
         origenTarjetaNombre: origenTarjetaNombre,
@@ -2563,12 +3605,15 @@ async function cargarRegistrosDesdeSupabase() {
     
     // Separar ganancias semanales de los registros normales
     retirosEfectivo = todosLosRegistros.filter(r => r.tipo === 'retiro_efectivo');
-    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo');
+    gastosMios = todosLosRegistros.filter(r => r.tipo === 'gasto_mio');
+    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo' && r.tipo !== 'gasto_mio');
     gananciasSemanales = todosLosRegistros.filter(r => r.tipo === 'ganancia_semanal');
+    normalizarBasesEdicion();
     
     localStorage.setItem('registros_cobros', JSON.stringify(registros));
     localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
     localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+    localStorage.setItem('gastos_mios', JSON.stringify(gastosMios));
     actualizarInterfaz();
 }
 
@@ -2601,12 +3646,15 @@ async function cargarDatosDesdeSupabase() {
 
       // Separar ganancias semanales de los registros normales
     retirosEfectivo = todosLosRegistros.filter(r => r.tipo === 'retiro_efectivo');
-    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo');
+    gastosMios = todosLosRegistros.filter(r => r.tipo === 'gasto_mio');
+    registros = todosLosRegistros.filter(r => r.tipo !== 'ganancia_semanal' && r.tipo !== 'retiro_efectivo' && r.tipo !== 'gasto_mio');
       gananciasSemanales = todosLosRegistros.filter(r => r.tipo === 'ganancia_semanal');
+    normalizarBasesEdicion();
 
       localStorage.setItem('registros_cobros', JSON.stringify(registros));
       localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
     localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+    localStorage.setItem('gastos_mios', JSON.stringify(gastosMios));
 
       // Actualizar la interfaz de usuario con los datos de la nube
       if (typeof actualizarInterfaz === 'function') actualizarInterfaz();
@@ -2661,6 +3709,8 @@ btnCancelar.addEventListener('click', resetFormulario);
 function actualizarInterfaz() {
     renderTarjetas();
     renderResumenHistorialEfectivo();
+    renderResumenHistorialTarjetas();
+    renderResumenHistorialGastos();
     renderTablas();
     renderGananciasSemanales();
     calcularTotales();
@@ -2694,8 +3744,8 @@ function renderTablas() {
     const prestado = registros.filter(r => r.tipo === 'prestado');
     const recibido = registros.filter(r => r.tipo === 'recibido');
     const recibidoPagado = registros.filter(r => r.tipo === 'recibido' && r.estado === 'pagado');
-    const deudasPendientes = registros.filter(r => r.tipo === 'deuda' && r.estado !== 'pagado');
-    const deudasPagadas = registros.filter(r => r.tipo === 'deuda' && r.estado === 'pagado');
+    const deudasPendientes = registros.filter(r => r.tipo === 'deuda' && obtenerSaldoDeuda(r) > 0.009);
+    const deudasPagadas = registros.filter(r => r.tipo === 'deuda' && obtenerSaldoDeuda(r) <= 0.009);
 
     renderTabla(tablaPendientes, pendientes, 'No hay cobros pendientes registrados.');
     renderTabla(tablaCobrados, cobrados, 'No hay cobros realizados registrados.');
@@ -2724,6 +3774,109 @@ function renderTabla(tabla, items, mensajeVacio, mostrarTodos = false) {
     });
 }
 
+function crearGrupoOtrosMovimientos(titulo, icono, items, crearContenido, clave) {
+        const grupo = document.createElement('section');
+        grupo.className = 'otros-movimientos-grupo';
+        grupo.dataset.historialGrupo = clave;
+        grupo.innerHTML = `<div class="otros-movimientos-encabezado"><h3><i class="fa-solid ${icono}"></i> ${titulo}</h3><button type="button" class="btn btn-history btn-history-small btn-ver-mas-otros">Ver más</button></div>`;
+        const lista = document.createElement('div');
+        lista.className = 'otros-movimientos-items';
+        const elementos = ordenarPorFecha(items);
+        if (items.length === 0) {
+            lista.innerHTML = '<p class="historial-vacio">No hay registros.</p>';
+        } else {
+            elementos.forEach((item, indice) => {
+                const contenido = crearContenido(item);
+                if (indice >= 3) contenido.hidden = true;
+                lista.appendChild(contenido);
+            });
+        }
+        const boton = grupo.querySelector('.btn-ver-mas-otros');
+        boton.hidden = items.length <= 3;
+        boton.addEventListener('click', () => abrirHistorialGrupo(titulo, icono, items, crearContenido));
+        grupo.appendChild(lista);
+        return grupo;
+}
+
+function abrirHistorialGrupo(titulo, icono, items, crearContenido, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialGrupo(titulo, icono, items, crearContenido, true));
+        return;
+    }
+    document.getElementById('titulo-historial-grupo').innerHTML = `<i class="fa-solid ${icono}"></i> Historial de ${titulo.toLowerCase()}`;
+    listaHistorialGrupo.innerHTML = '';
+    btnVerMasHistorialGrupo.hidden = true;
+    ordenarPorFecha(items).forEach(item => listaHistorialGrupo.appendChild(crearContenido(item)));
+    modalHistorialGrupo.hidden = false;
+    modalHistorialGrupo.style.display = 'flex';
+}
+
+function cerrarHistorialGrupo() {
+    modalHistorialGrupo.hidden = true;
+    modalHistorialGrupo.style.display = 'none';
+}
+
+function abrirHistorialSeccion(titulo, items, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialSeccion(titulo, items, true));
+        return;
+    }
+    historialGrupoItems = ordenarPorFecha(items);
+    historialGrupoCrearContenido = crearContenidoMovimientoEditable;
+    document.getElementById('titulo-historial-grupo').innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${titulo}`;
+    listaHistorialGrupo.innerHTML = '';
+    historialGrupoItems.forEach((item, indice) => {
+        const contenido = historialGrupoCrearContenido(item);
+        contenido.hidden = indice >= 3;
+        listaHistorialGrupo.appendChild(contenido);
+    });
+    btnVerMasHistorialGrupo.hidden = historialGrupoItems.length <= 3;
+    btnVerMasHistorialGrupo.textContent = 'Ver más';
+    btnVerMasHistorialGrupo.dataset.expandido = 'false';
+    modalHistorialGrupo.hidden = false;
+    modalHistorialGrupo.style.display = 'flex';
+}
+
+function crearContenidoMovimientoEditable(item) {
+    const fila = document.createElement('div');
+    fila.className = 'otro-movimiento-item';
+    fila.dataset.registroId = item.id;
+    fila.innerHTML = `<div><strong>${escaparHtml(item.cliente)} ${etiquetaModificacion(item)}</strong><span>$${Number(item.monto).toFixed(2)} · ${escaparHtml(item.descripcion)}</span><small>${new Date(item.fechaHora).toLocaleString('es-EC')}</small></div><div class="otro-movimiento-acciones"><button type="button" class="btn-retiro-editar btn-editar-otro-registro" title="Editar"><i class="fa-solid fa-pen"></i></button><button type="button" class="btn-retiro-eliminar btn-eliminar-otro-registro" title="Eliminar"><i class="fa-solid fa-xmark"></i></button></div>`;
+    return fila;
+}
+
+function abrirOtrosMovimientos(autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirOtrosMovimientos(true));
+        return;
+    }
+        listaOtrosMovimientos.innerHTML = '';
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Cobros realizados', 'fa-circle-check', registros.filter(item => item.tipo === 'cobrado'), crearContenidoMovimientoEditable, 'cobrados'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Cobros pendientes', 'fa-clock', registros.filter(item => item.tipo === 'pendiente'), crearContenidoMovimientoEditable, 'pendientes'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Dinero prestado y recibido', 'fa-hand-holding-dollar', registros.filter(item => item.tipo === 'prestado' || item.tipo === 'recibido'), crearContenidoMovimientoEditable, 'prestamos'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Deudas', 'fa-file-invoice-dollar', registros.filter(item => item.tipo === 'deuda'), crearContenidoMovimientoEditable, 'deudas'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Retiros en efectivo', 'fa-money-bill-wave', retirosEfectivo, item => {
+            const fila = document.createElement('div');
+            fila.innerHTML = crearHtmlRetiroEfectivo(item);
+            return fila.firstElementChild;
+        }, 'efectivo'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Retiros por tarjeta', 'fa-credit-card', obtenerRetirosTarjetas(), item => {
+            const fila = document.createElement('div');
+            fila.innerHTML = crearHtmlRetiroTarjeta(item);
+            return fila.firstElementChild;
+        }, 'tarjetas'));
+        listaOtrosMovimientos.appendChild(crearGrupoOtrosMovimientos('Gastos míos', 'fa-bag-shopping', gastosMios, item => {
+            const fila = document.createElement('div');
+            fila.innerHTML = crearHtmlGasto(item);
+            return fila.firstElementChild;
+        }, 'gastos'));
+        document.getElementById('titulo-historial-registros').innerHTML = '<i class="fa-solid fa-list"></i> Otros movimientos';
+        tablaHistorialRegistros.closest('.table-responsive').hidden = true;
+        listaOtrosMovimientos.hidden = false;
+        modalHistorialRegistros.hidden = false;
+        modalHistorialRegistros.style.display = 'flex';
+}
+
 const datosHistorialSecciones = {
     pendientes: {
         titulo: 'Pendientes de Pago (Deudas)',
@@ -2738,12 +3891,12 @@ const datosHistorialSecciones = {
     'deudas-pendientes': {
         titulo: 'Deudas pendientes',
         mensaje: 'No hay deudas pendientes registradas.',
-        obtener: () => registros.filter(r => r.tipo === 'deuda' && r.estado !== 'pagado')
+        obtener: () => registros.filter(r => r.tipo === 'deuda' && obtenerSaldoDeuda(r) > 0.009)
     },
     'deudas-pagadas': {
         titulo: 'Historial de deudas pagadas',
         mensaje: 'No hay deudas pagadas registradas.',
-        obtener: () => registros.filter(r => r.tipo === 'deuda' && r.estado === 'pagado')
+        obtener: () => registros.filter(r => r.tipo === 'deuda' && obtenerSaldoDeuda(r) <= 0.009)
     },
     prestado: {
         titulo: 'Dinero que Presté',
@@ -2763,15 +3916,29 @@ const datosHistorialSecciones = {
     }
 };
 
-function abrirHistorialRegistros(seccion) {
+function abrirHistorialRegistros(seccion, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => abrirHistorialRegistros(seccion, true));
+        return;
+    }
     const datos = datosHistorialSecciones[seccion];
     if (!datos) return;
-
-    document.getElementById('titulo-historial-registros').innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> ${datos.titulo}`;
-    renderTabla(tablaHistorialRegistros, datos.obtener(), datos.mensaje, true);
-    modalHistorialRegistros.hidden = false;
-    modalHistorialRegistros.style.display = 'flex';
+    abrirHistorialSeccion(datos.titulo, datos.obtener(), true);
 }
+
+if (btnVerOtrosMovimientos) btnVerOtrosMovimientos.addEventListener('click', () => abrirOtrosMovimientos());
+btnCerrarHistorialGrupo.addEventListener('click', cerrarHistorialGrupo);
+btnVerMasHistorialGrupo.addEventListener('click', () => {
+    const mostrarTodo = btnVerMasHistorialGrupo.dataset.expandido !== 'true';
+    listaHistorialGrupo.querySelectorAll('[data-registro-id]').forEach((item, indice) => {
+        if (indice >= 3) item.hidden = !mostrarTodo;
+    });
+    btnVerMasHistorialGrupo.dataset.expandido = String(mostrarTodo);
+    btnVerMasHistorialGrupo.textContent = mostrarTodo ? 'Ver menos' : 'Ver más';
+});
+modalHistorialGrupo.addEventListener('click', event => {
+    if (event.target === modalHistorialGrupo) cerrarHistorialGrupo();
+});
 
 function cerrarHistorialRegistros() {
     modalHistorialRegistros.hidden = true;
@@ -2800,7 +3967,7 @@ function crearFila(item) {
     const esPendiente = item.tipo === 'pendiente' || (esGananciaSemanal && item.estado === 'pendiente');
     const esPrestamoPendiente = item.tipo === 'prestado' && item.estado !== 'pagado';
     const esRecibidoPendiente = item.tipo === 'recibido' && item.estado !== 'pagado';
-    const esDeudaPendiente = item.tipo === 'deuda' && item.estado !== 'pagado';
+    const esDeudaPendiente = item.tipo === 'deuda' && obtenerSaldoDeuda(item) > 0.009;
     const totalAbonado = item.tipo === 'deuda' ? obtenerTotalAbonado(item) : 0;
     const saldoDeuda = item.tipo === 'deuda' ? obtenerSaldoDeuda(item) : 0;
     const colorMonto = esPendiente || esDeudaPendiente ? '#ef4444' : item.tipo === 'prestado' ? '#f59e0b' : '#10b981';
@@ -2810,19 +3977,21 @@ function crearFila(item) {
     const estadoPrestamo = item.tipo === 'prestado'
         ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagado' : '⏳ Deuda pendiente'}</span>`
         : '';
+    const deudaPagada = item.tipo === 'deuda' && obtenerSaldoDeuda(item) <= 0.009;
     const estadoDeuda = item.tipo === 'deuda'
-        ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagada' : '⏳ Pendiente'}</span>`
+        ? `<span class="estado-prestamo ${deudaPagada ? 'pagado' : 'pendiente'}">${deudaPagada ? '✅ Pagada' : '⏳ Pendiente'}</span>`
         : '';
     const resumenDeuda = item.tipo === 'deuda'
         ? `<div class="resumen-deuda"><span>Total: $${Number(item.monto).toFixed(2)}</span><span>Abonado: $${totalAbonado.toFixed(2)}</span><span>Falta: $${saldoDeuda.toFixed(2)}</span></div>`
         : '';
+    const montoMostrado = item.tipo === 'deuda' ? saldoDeuda : Number(item.monto);
     const estadoRecibido = item.tipo === 'recibido'
         ? `<span class="estado-prestamo ${item.estado === 'pagado' ? 'pagado' : 'pendiente'}">${item.estado === 'pagado' ? '✅ Pagada' : '⏳ Deuda pendiente'}</span>`
         : '';
 
     tr.innerHTML = `
-    <td><strong>${item.cliente}</strong></td>
-    <td style="color: ${colorMonto}; font-weight: 700;">$${item.monto.toFixed(2)}</td>
+    <td><strong>${item.cliente} ${etiquetaModificacion(item)}</strong></td>
+    <td style="color: ${colorMonto}; font-weight: 700;">$${montoMostrado.toFixed(2)}</td>
     <td>${item.descripcion}${estadoPrestamo}${estadoDeuda}${estadoRecibido}${resumenDeuda}</td>
     <td>${fechaFormateada}</td>
     <td>
@@ -2833,7 +4002,7 @@ function crearFila(item) {
                 ${item.tipo === 'recibido' && item.estado === 'pagado' ? '<span class="estado-prestamo pagado">✅ Pagada</span>' : ''}
                 ${esDeudaPendiente ? `<button class="btn btn-pay" onclick="marcarDeudaComoPagada('${item.id}')" title="Pagar deuda"><i class="fa-solid fa-file-invoice-dollar"></i> Pagar deuda</button>` : ''}
                 ${esDeudaPendiente ? `<button class="btn btn-destino" onclick="abrirModalAbonoDeuda('${item.id}')" title="Abonar una parte"><i class="fa-solid fa-coins"></i> Abonar</button>` : ''}
-                ${item.tipo === 'deuda' && item.estado === 'pagado' ? `<button class="btn btn-destino" onclick="cambiarPagoDeuda('${item.id}')" title="Cambiar método de pago"><i class="fa-solid fa-arrows-rotate"></i> Cambiar pago</button>` : ''}
+                ${item.tipo === 'deuda' && deudaPagada ? `<button class="btn btn-destino" onclick="cambiarPagoDeuda('${item.id}')" title="Cambiar método de pago"><i class="fa-solid fa-arrows-rotate"></i> Cambiar pago</button>` : ''}
             <button class="btn btn-edit" onclick="editarRegistroEnTabla('${item.id}', this)" title="Editar registro aquí"><i class="fa-solid fa-pen"></i></button>
         ${item.tipo !== 'deuda' ? `<button class="btn btn-destino" onclick="abrirEditarDestinoCalendario('${item.id}', ${!esGananciaSemanal})" title="${textoDestino}"><i class="fa-solid fa-wallet"></i></button>` : ''}
             <button class="btn btn-delete" onclick="${esGananciaSemanal ? `eliminarGananciaSemanal('${item.id}')` : `eliminarRegistro('${item.id}')`}" title="Eliminar registro"><i class="fa-solid fa-trash"></i></button>
@@ -2843,7 +4012,11 @@ function crearFila(item) {
     return tr;
 }
 
-window.editarRegistroEnTabla = function(id, boton) {
+window.editarRegistroEnTabla = function(id, boton, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.editarRegistroEnTabla(id, boton, true));
+        return;
+    }
     const item = [...registros, ...gananciasSemanales, ...retirosEfectivo].find(registro => registro.id === id);
     if (!item) return;
 
@@ -2905,6 +4078,7 @@ window.editarRegistroEnTabla = function(id, boton) {
         item.monto = monto;
         item.descripcion = descripcion;
         item.fechaHora = fechaHora;
+        actualizarEstadoEdicionRegistro(item);
         await guardarRegistroEnSupabase(item);
         guardarYActualizar();
     });
@@ -2934,7 +4108,11 @@ function marcarComoCobrado(id) {
 }
 
 
-function cargarParaEditar(id) {
+function cargarParaEditar(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => cargarParaEditar(id, true));
+        return;
+    }
     const item = registros.find(r => r.id === id);
     if (item) {
         registroIdInput.value = item.id;
@@ -2950,10 +4128,14 @@ function cargarParaEditar(id) {
     }
 }
 
-function eliminarRegistro(id) {
+function eliminarRegistro(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadEliminacion(() => eliminarRegistro(id, true));
+        return;
+    }
     const retiroEfectivo = retirosEfectivo.find(retiro => retiro.id === id);
     if (retiroEfectivo) {
-        eliminarRetiroEfectivo(id);
+        eliminarRetiroEfectivo(id, true);
         return;
     }
     registroPendienteDeEliminar = id;
@@ -2970,12 +4152,24 @@ function cerrarModalEliminar() {
     registroPendienteDeEliminar = null;
     tarjetaPendienteDeEliminar = null;
     retiroPendienteDeEliminar = null;
+    gastoPendienteDeEliminar = null;
     gananciaPendienteDeEliminar = null;
     modalTituloEliminacion.textContent = '¿Estás seguro de que quieres eliminar este registro?';
     modalMensajeEliminacion.textContent = 'Esta acción no se puede deshacer.';
 }
 
 async function confirmarEliminacion() {
+    if (gastoPendienteDeEliminar) {
+        const gasto = gastoPendienteDeEliminar;
+        devolverMontoGastoAlOrigen(gasto);
+        gastosMios = gastosMios.filter(item => item.id !== gasto.id);
+        guardarYActualizar();
+        await guardarTarjetas();
+        await eliminarRegistroDeSupabase(gasto.id);
+        cerrarModalEliminar();
+        return;
+    }
+
     if (gananciaPendienteDeEliminar) {
         const id = gananciaPendienteDeEliminar.id;
         gananciasSemanales = gananciasSemanales.filter(ganancia => ganancia.id !== id);
@@ -3003,6 +4197,8 @@ async function confirmarEliminacion() {
         guardarTarjetas();
         renderTarjetas();
         renderDetalleTarjeta();
+        renderResumenHistorialTarjetas();
+        if (!modalHistorialRetirosTarjetas.hidden) abrirHistorialRetirosTarjetas();
         cerrarModalEliminar();
         return;
     }
@@ -3048,6 +4244,8 @@ modalEliminar.addEventListener('click', function(e) {
 
 function calcularTotales() {
     const ahora = new Date();
+    const inicioSemana = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() - ahora.getDay());
+    const finSemana = new Date(inicioSemana.getFullYear(), inicioSemana.getMonth(), inicioSemana.getDate() + 7);
 
     let totalDiario = 0;
     let totalSemanal = 0;
@@ -3070,8 +4268,7 @@ function calcularTotales() {
                 totalDiario += item.monto;
             }
 
-            const diferenciaDias = (ahora - fechaItem) / (1000 * 60 * 60 * 24);
-            if (diferenciaDias >= 0 && diferenciaDias <= 7) {
+            if (fechaItem >= inicioSemana && fechaItem < finSemana) {
                 totalSemanal += item.monto;
             }
 
@@ -3105,8 +4302,7 @@ function calcularTotales() {
                 totalDiario += item.monto;
             }
 
-            const diferenciaDias = (ahora - fechaItem) / (1000 * 60 * 60 * 24);
-            if (diferenciaDias >= 0 && diferenciaDias <= 7) {
+            if (fechaItem >= inicioSemana && fechaItem < finSemana) {
                 totalSemanal += item.monto;
             }
 
@@ -3127,11 +4323,37 @@ function calcularTotales() {
     document.getElementById('total-pendiente').innerText = `$${totalPendiente.toFixed(2)}`;
     document.getElementById('total-prestado').innerText = `$${totalPrestado.toFixed(2)}`;
     document.getElementById('total-recibido').innerText = `$${totalRecibido.toFixed(2)}`;
-    montoTotalGeneralElement.innerText = totalGeneralOculto ? '••••••' : `$${totalMontoGeneral.toFixed(2)}`;
+    actualizarMontoTotalActual();
     actualizarMontoEfectivo();
 }
 
-window.editarGananciaSemanal = function(id) {
+function actualizarCuentaRegresivaDia() {
+    const ahora = new Date();
+    const proximaMedianoche = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + 1);
+    const proximoDomingo = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate() + (7 - ahora.getDay()));
+    const proximoMes = new Date(ahora.getFullYear(), ahora.getMonth() + 1, 1);
+    const formatear = (elemento, destino, texto) => {
+        if (!elemento) return;
+        const segundosRestantes = Math.max(0, Math.ceil((destino.getTime() - ahora.getTime()) / 1000));
+        const horas = Math.floor(segundosRestantes / 3600);
+        const minutos = Math.floor((segundosRestantes % 3600) / 60);
+        const segundos = segundosRestantes % 60;
+        elemento.textContent = `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+        elemento.title = `Faltan ${horas} horas, ${minutos} minutos y ${segundos} segundos para cerrar ${texto}`;
+    };
+    formatear(cuentaRegresivaDia, proximaMedianoche, 'el día');
+    formatear(cuentaRegresivaSemana, proximoDomingo, 'la semana');
+    formatear(cuentaRegresivaMes, proximoMes, 'el mes');
+}
+
+actualizarCuentaRegresivaDia();
+temporizadorCuentaRegresivaDia = setInterval(actualizarCuentaRegresivaDia, 1000);
+
+window.editarGananciaSemanal = function(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.editarGananciaSemanal(id, true));
+        return;
+    }
     const ganancia = gananciasSemanales.find(item => item.id === id);
     if (!ganancia) return;
 
@@ -3175,7 +4397,11 @@ window.editarGananciaSemanal = function(id) {
     modalAgregarGanancia.style.display = 'flex';
 }
 
-window.marcarPrestamoComoPagado = function(id) {
+window.marcarPrestamoComoPagado = function(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.marcarPrestamoComoPagado(id, true));
+        return;
+    }
     const prestamo = registros.find(registro => registro.id === id && registro.tipo === 'prestado');
     if (!prestamo || prestamo.estado === 'pagado') return;
 
@@ -3193,7 +4419,11 @@ window.marcarRecibidoComoPagado = async function(id) {
     mostrarModalSeleccionarTarjeta();
 }
 
-window.marcarDeudaComoPagada = function(id) {
+window.marcarDeudaComoPagada = function(id, autorizado = false) {
+    if (!autorizado) {
+        solicitarSeguridadCalendario(() => window.marcarDeudaComoPagada(id, true));
+        return;
+    }
     const deuda = registros.find(registro => registro.id === id && registro.tipo === 'deuda');
     if (!deuda || deuda.estado === 'pagado') return;
 
@@ -3216,6 +4446,13 @@ window.cambiarPagoDeuda = function(id) {
     registroPendienteDeGuardar = deuda;
     mostrarModalSeleccionarTarjeta();
 }
+
+normalizarBasesEdicion();
+localStorage.setItem('registros_cobros', JSON.stringify(registros));
+localStorage.setItem('ganancias_semanales', JSON.stringify(gananciasSemanales));
+localStorage.setItem('retiros_efectivo', JSON.stringify(retirosEfectivo));
+localStorage.setItem('gastos_mios', JSON.stringify(gastosMios));
+localStorage.setItem('tarjetas_bancarias', JSON.stringify(tarjetas));
 
 // Iniciar la carga al completar la lectura del DOM
 cargaInicialSupabase = cargarDatosDesdeSupabase();
